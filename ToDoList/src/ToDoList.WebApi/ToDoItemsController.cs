@@ -8,18 +8,57 @@ using ToDoList.Domain.DTOs;
 [ApiController]
 public class ToDoItemsController : ControllerBase
 {
-    private static List<ToDoItem> items = [];
+
+    private static readonly List<ToDoItem> items = [];
 
     [HttpPost]
     public IActionResult Create(ToDoItemCreateRequestDto request) //pouzijeme DTO - Data Transfer Object
     {
-        return Ok(); //200
+        var item = request.ToDomain();
+
+        //try to create an item
+        try
+        {
+            item.ToDoItemId = items.Count == 0 ? 1 : items.Max(o => o.ToDoItemId) + 1;
+            items.Add(item);
+        }
+        catch (Exception ex)
+        {
+            return Problem(ex.Message, null, StatusCodes.Status500InternalServerError); //500
+        }
+
+        //respond to client
+        var responseDto = ToDoItemGetResponseDto.FromDomain(item);
+        return Created();
     }
 
     [HttpGet]
     public IActionResult Read() //api/ToDoItems GET
     {
-        return Ok(); //200
+        try
+        {
+            if (items == null)
+            {
+                return NotFound(); // 404
+            }
+
+            if (items.Count == 0)
+            {
+                return NotFound(); // 404
+            }
+
+            var responseDtos = new List<ToDoItemGetResponseDto>();
+            foreach (var item in items)
+            {
+                var dto = ToDoItemGetResponseDto.FromDomain(item);
+                responseDtos.Add(dto);
+            }
+            return Ok(responseDtos); // 200
+        }
+        catch (Exception ex)
+        {
+            return Problem(ex.Message, null, StatusCodes.Status500InternalServerError); // 500
+        }
     }
 
     [HttpGet("{toDoItemId:int}")]
