@@ -47,10 +47,10 @@ public class ToDoItemsController : ControllerBase
                 return NotFound(); // 404
             }
 
-            var responseDtos = new List<ToDoItemGetResponseDto>();
-            foreach (var item in items)
+            List<ToDoItemGetResponseDto> responseDtos = new List<ToDoItemGetResponseDto>();
+            foreach (ToDoItem item in items)
             {
-                var dto = ToDoItemGetResponseDto.FromDomain(item);
+                ToDoItemGetResponseDto dto = ToDoItemGetResponseDto.FromDomain(item);
                 responseDtos.Add(dto);
             }
             return Ok(responseDtos); // 200
@@ -91,7 +91,32 @@ public class ToDoItemsController : ControllerBase
     public IActionResult UpdateById(int toDoItemId, [FromBody]
     ToDoItemUpdateRequestDto request)
     {
-        return Ok(); //200
+        try
+        {
+            ToDoItem itemToUpdate = items.Find(i => i.ToDoItemId == toDoItemId);
+
+            if (itemToUpdate == null)
+            {
+                return NotFound(); // 404
+            }
+
+            if (items.Count == 0)
+            {
+                return NotFound(); // 404
+            }
+
+            // Update item properties
+            itemToUpdate.Name = request.Name;
+            itemToUpdate.Description = request.Description;
+            itemToUpdate.IsCompleted = request.IsCompleted;
+
+            var responseDto = ToDoItemGetResponseDto.FromDomain(itemToUpdate);
+            return Ok(responseDto); // 200
+        }
+        catch (Exception ex)
+        {
+            return Problem(ex.Message, null, StatusCodes.Status500InternalServerError); // 500
+        }
     }
 
     [HttpDelete("{toDoItemId:int}")]

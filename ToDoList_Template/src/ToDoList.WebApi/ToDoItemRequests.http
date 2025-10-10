@@ -33,13 +33,13 @@ PUT {{host}}:{{port}}/api/ToDoItems/{{itemToUpdateId}}
 Content-Type: application/json
 
 {
-  "name": "Updated Task",
-  "description": "Updated Description",
+  "name": "Odpočívej",
+  "description": "Už nemusíš programovat",
   "isCompleted": false
 }
 
 ###
 
 //Delete exisiting ToDoItem by id
-@itemToDeleteId = 2
+@itemToDeleteId = 1
 DELETE {{host}}:{{port}}/api/ToDoItems/{{itemToDeleteId}}
