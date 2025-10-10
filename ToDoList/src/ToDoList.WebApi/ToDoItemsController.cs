@@ -14,7 +14,7 @@ public class ToDoItemsController : ControllerBase
     [HttpPost]
     public IActionResult Create(ToDoItemCreateRequestDto request) //pouzijeme DTO - Data Transfer Object
     {
-        var item = request.ToDomain();
+        ToDoItem item = request.ToDomain();
 
         //try to create an item
         try
@@ -28,7 +28,7 @@ public class ToDoItemsController : ControllerBase
         }
 
         //respond to client
-        var responseDto = ToDoItemGetResponseDto.FromDomain(item);
+        ToDoItemGetResponseDto responseDto = ToDoItemGetResponseDto.FromDomain(item);
         return Created();
     }
 
@@ -66,13 +66,25 @@ public class ToDoItemsController : ControllerBase
     {
         try
         {
-            throw new Exception("Neco se opravdu nepovedlo.");
+            ToDoItem item = items.Find(i => i.ToDoItemId == toDoItemId);
+
+            if (item == null)
+            {
+                return NotFound(); // 404
+            }
+
+            if (items.Count == 0)
+            {
+                return NotFound(); // 404
+            }
+
+            ToDoItemGetResponseDto responseDto = ToDoItemGetResponseDto.FromDomain(item);
+            return Ok(responseDto); // 200
         }
         catch (Exception ex)
         {
             return Problem(ex.Message, null, StatusCodes.Status500InternalServerError); //500
         }
-        return Ok(); //200
     }
 
     [HttpPut("{toDoItemId:int}")]
