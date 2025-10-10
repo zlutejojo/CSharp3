@@ -9,7 +9,7 @@ GET {{host}}:{{port}}/api/ToDoItems
 ###
 
 //Get specific ToDoItem by id
-@itemToGetId = 2
+@itemToGetId = 1
 GET {{host}}:{{port}}/api/ToDoItems/{{itemToGetId}}
 
 ###
@@ -41,5 +41,5 @@ Content-Type: application/json
 ###
 
 //Delete exisiting ToDoItem by id
-@itemToDeleteId = 1
+@itemToDeleteId = 2
 DELETE {{host}}:{{port}}/api/ToDoItems/{{itemToDeleteId}}
