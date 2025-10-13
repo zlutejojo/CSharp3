@@ -8,18 +8,57 @@ using ToDoList.Domain.DTOs;
 [ApiController]
 public class ToDoItemsController : ControllerBase
 {
-    private static List<ToDoItem> items = [];
+
+    private static readonly List<ToDoItem> items = [];
 
     [HttpPost]
     public IActionResult Create(ToDoItemCreateRequestDto request) //pouzijeme DTO - Data Transfer Object
     {
-        return Ok(); //200
+        ToDoItem item = request.ToDomain();
+
+        //try to create an item
+        try
+        {
+            item.ToDoItemId = items.Count == 0 ? 1 : items.Max(o => o.ToDoItemId) + 1;
+            items.Add(item);
+        }
+        catch (Exception ex)
+        {
+            return Problem(ex.Message, null, StatusCodes.Status500InternalServerError); //500
+        }
+
+        //respond to client
+        ToDoItemGetResponseDto responseDto = ToDoItemGetResponseDto.FromDomain(item);
+        return Created();
     }
 
     [HttpGet]
     public IActionResult Read() //api/ToDoItems GET
     {
-        return Ok(); //200
+        try
+        {
+            if (items == null)
+            {
+                return NotFound(); // 404
+            }
+
+            if (items.Count == 0)
+            {
+                return NotFound(); // 404
+            }
+
+            List<ToDoItemGetResponseDto> responseDtos = new List<ToDoItemGetResponseDto>();
+            foreach (ToDoItem item in items)
+            {
+                ToDoItemGetResponseDto dto = ToDoItemGetResponseDto.FromDomain(item);
+                responseDtos.Add(dto);
+            }
+            return Ok(responseDtos); // 200
+        }
+        catch (Exception ex)
+        {
+            return Problem(ex.Message, null, StatusCodes.Status500InternalServerError); // 500
+        }
     }
 
     [HttpGet("{toDoItemId:int}")]
@@ -27,25 +66,83 @@ public class ToDoItemsController : ControllerBase
     {
         try
         {
-            throw new Exception("Neco se opravdu nepovedlo.");
+            ToDoItem item = items.Find(i => i.ToDoItemId == toDoItemId);
+
+            if (item == null)
+            {
+                return NotFound(); // 404
+            }
+
+            if (items.Count == 0)
+            {
+                return NotFound(); // 404
+            }
+
+            ToDoItemGetResponseDto responseDto = ToDoItemGetResponseDto.FromDomain(item);
+            return Ok(responseDto); // 200
         }
         catch (Exception ex)
         {
             return Problem(ex.Message, null, StatusCodes.Status500InternalServerError); //500
         }
-        return Ok(); //200
     }
 
     [HttpPut("{toDoItemId:int}")]
     public IActionResult UpdateById(int toDoItemId, [FromBody]
     ToDoItemUpdateRequestDto request)
     {
-        return Ok(); //200
+        try
+        {
+            ToDoItem itemToUpdate = items.Find(i => i.ToDoItemId == toDoItemId);
+
+            if (itemToUpdate == null)
+            {
+                return NotFound(); // 404
+            }
+
+            if (items.Count == 0)
+            {
+                return NotFound(); // 404
+            }
+
+            // Update item properties
+            itemToUpdate.Name = request.Name;
+            itemToUpdate.Description = request.Description;
+            itemToUpdate.IsCompleted = request.IsCompleted;
+
+            var responseDto = ToDoItemGetResponseDto.FromDomain(itemToUpdate);
+            return Ok(responseDto); // 200
+        }
+        catch (Exception ex)
+        {
+            return Problem(ex.Message, null, StatusCodes.Status500InternalServerError); // 500
+        }
     }
 
     [HttpDelete("{toDoItemId:int}")]
-    public IActionResult DeleteById()
+    public IActionResult DeleteById(int toDoItemId)
     {
-        return Ok(); //200
+        try
+        {
+            ToDoItem itemToDelete = items.Find(i => i.ToDoItemId == toDoItemId);
+
+            if (itemToDelete == null)
+            {
+                return NotFound(); // 404
+            }
+
+            if (items.Count == 0)
+            {
+                return NotFound(); // 404
+            }
+
+            items.Remove(itemToDelete);
+
+            return NoContent(); // 204
+        }
+        catch (Exception ex)
+        {
+            return Problem(ex.Message, null, StatusCodes.Status500InternalServerError); // 500
+        }
     }
 }

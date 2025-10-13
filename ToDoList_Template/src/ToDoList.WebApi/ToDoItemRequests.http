@@ -19,8 +19,8 @@ POST {{host}}:{{port}}/api/ToDoItems
 Content-Type: application/json
 
 {
-  "name": "Example New Task",
-  "description": "Example New Description",
+  "name": "Programuj",
+  "description": "Vypracuj úkoly z C#",
   "isCompleted": false
 }
 
@@ -33,8 +33,8 @@ PUT {{host}}:{{port}}/api/ToDoItems/{{itemToUpdateId}}
 Content-Type: application/json
 
 {
-  "name": "Updated Task",
-  "description": "Updated Description",
+  "name": "Odpočívej",
+  "description": "Už nemusíš programovat",
   "isCompleted": false
 }
 
