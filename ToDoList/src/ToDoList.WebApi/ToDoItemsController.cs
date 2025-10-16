@@ -150,4 +150,9 @@ public class ToDoItemsController : ControllerBase
     {
         items.Add(item);
     }
+
+    public void RemoveItemFromStorage(ToDoItem item)
+    {
+        items.Remove(item);
+    }
 }

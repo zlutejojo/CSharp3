@@ -1,36 +1,40 @@
 namespace ToDoList.Test;
 
+using System.Reflection;
+using Microsoft.AspNetCore.Mvc;
 using ToDoList.Domain.Models;
 using ToDoList.WebApi;
 
-public class GetTests
+public class GetTests : IDisposable
 {
+    ToDoItemsController controller;
+    ToDoItem todoItem1;
+    ToDoItem todoItem2;
     [Fact]
     public void Get_AllItems_ReturnsAllItems()
     {
         // Arrange
-        var todoItem1 = new ToDoItem
+        todoItem1 = new ToDoItem
         {
             ToDoItemId = 1,
             Name = "Udělej nákup",
             Description = "Kup rohlíky, maso, šunku",
             IsCompleted = false
         };
-        var todoItem2 = new ToDoItem
+        todoItem2 = new ToDoItem
         {
             ToDoItemId = 2,
             Name = "Umyj nádobí",
             Description = "Umyj talíře a příbory",
             IsCompleted = true
         };
-        var controller = new ToDoItemsController();
+        controller = new ToDoItemsController();
         controller.AddItemToStorage(todoItem1);
         controller.AddItemToStorage(todoItem2);
 
         // Act
         var result = controller.Read();
         var value = result.GetValue();
-        //var value = result.GetValue();
 
         // Assert
         Assert.NotNull(value);
@@ -42,4 +46,9 @@ public class GetTests
         Assert.Equal(todoItem1.IsCompleted, firstToDo.IsCompleted);
     }
 
+    public void Dispose()
+    {
+        controller.RemoveItemFromStorage(todoItem1);
+        controller.RemoveItemFromStorage(todoItem2);
+    }
 }
