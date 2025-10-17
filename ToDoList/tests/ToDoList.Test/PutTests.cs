@@ -39,7 +39,7 @@ public class PutTests : IDisposable
         Assert.Equal(request.IsCompleted, value.First().IsCompleted);
     }
 
- [Fact]
+    [Fact]
     public void Put_UpdateNonExistentItem_ReturnsNotFound()
     {
         // Arrange
@@ -70,5 +70,4 @@ public class PutTests : IDisposable
             list?.Clear();
         }
     }
-
 }
