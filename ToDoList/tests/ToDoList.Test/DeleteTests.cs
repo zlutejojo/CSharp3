@@ -14,6 +14,7 @@ public class DeleteTests : IDisposable
     {
         _controller = new ToDoItemsController();
     }
+
     [Fact]
     public void Delete_DeletedItem_ReturnsOk()
     {

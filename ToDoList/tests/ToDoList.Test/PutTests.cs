@@ -9,12 +9,17 @@ namespace ToDoList.Test;
 
 public class PutTests : IDisposable
 {
-    ToDoItemsController controller;
+    private readonly ToDoItemsController _controller;
+
+    public PutTests()
+    {
+        _controller = new ToDoItemsController();
+    }
+
     [Fact]
     public void Put_UpdateItem_ReturnsCreatedResponse()
     {
         // Arrange
-        controller = new ToDoItemsController();
         var request = new ToDoItemUpdateRequestDto("Vyžehli", "použij napařovací žehličku", false);
 
         // Act
@@ -25,9 +30,9 @@ public class PutTests : IDisposable
             Description = "Ujdi aspoň 5 km",
             IsCompleted = false
         };
-        controller.AddItemToStorage(todoItem1);
-        IActionResult actionResult = controller.UpdateById(1, request);
-        var getResult = controller.Read();
+        _controller.AddItemToStorage(todoItem1);
+        IActionResult actionResult = _controller.UpdateById(1, request);
+        var getResult = _controller.Read();
         var value = getResult.GetValue();
 
         // Assert
@@ -43,14 +48,13 @@ public class PutTests : IDisposable
     public void Put_UpdateNonExistentItem_ReturnsNotFound()
     {
         // Arrange
-        controller = new ToDoItemsController();
         var request = new ToDoItemUpdateRequestDto("Nic", "Nic", false);
         //předpokládám, že v seznamu není žádná položka s tímto ID
         int nonExistentId = 99999;
 
         // Act
         // Zavoláme metodu pro update s neexistujícím ID.
-        IActionResult actionResult = controller.UpdateById(nonExistentId, request);
+        IActionResult actionResult = _controller.UpdateById(nonExistentId, request);
 
         // Assert
         var notFoundResult = Assert.IsType<NotFoundResult>(actionResult);
