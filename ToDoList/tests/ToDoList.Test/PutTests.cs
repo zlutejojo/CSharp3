@@ -43,6 +43,7 @@ public class PutTests : IDisposable
     public void Put_UpdateNonExistentItem_ReturnsNotFound()
     {
         // Arrange
+        controller = new ToDoItemsController();
         var request = new ToDoItemUpdateRequestDto("Nic", "Nic", false);
         //předpokládám, že v seznamu není žádná položka s tímto ID
         int nonExistentId = 99999;
