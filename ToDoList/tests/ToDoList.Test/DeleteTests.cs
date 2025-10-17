@@ -8,12 +8,16 @@ namespace ToDoList.Test;
 
 public class DeleteTests : IDisposable
 {
-    ToDoItemsController controller;
+    private readonly ToDoItemsController _controller;
+
+    public DeleteTests()
+    {
+        _controller = new ToDoItemsController();
+    }
     [Fact]
     public void Delete_DeletedItem_ReturnsOk()
     {
         // Arrange
-        controller = new ToDoItemsController();
         ToDoItem todoItem = new ToDoItem
         {
             ToDoItemId = 1,
@@ -23,16 +27,27 @@ public class DeleteTests : IDisposable
         };
 
         // Act
-        controller = new ToDoItemsController();
-        controller.AddItemToStorage(todoItem);
-
-        IActionResult actionResult = controller.DeleteById(1);
-        var getResult = controller.Read();
-        var value = getResult.GetValue();
+        _controller.AddItemToStorage(todoItem);
+        IActionResult actionResult = _controller.DeleteById(1);
 
         // Assert
         var noContentResult = Assert.IsType<NoContentResult>(actionResult);
         Assert.Equal(204, noContentResult.StatusCode);
+    }
+
+    [Fact]
+    public void Delete_NonExistentItem_ReturnsNotFound()
+    {
+        // Arrange
+        // předpokládám, že v seznamu není žádná položka s tímto ID
+        int nonExistentId = 99999;
+
+        // Act
+        var actionResult = _controller.DeleteById(nonExistentId);
+
+        // Assert
+        var notFoundResult = Assert.IsType<NotFoundResult>(actionResult);
+        Assert.Equal(404, notFoundResult.StatusCode);
     }
 
     //mazání pomocí reflexe - vyčištění statického seznamu items v ToDoItemsController
