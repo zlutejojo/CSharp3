@@ -1,39 +1,48 @@
 using System;
-using System.Reflection;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
 using ToDoList.Domain.Models;
+using ToDoList.Persistence;
 using ToDoList.WebApi;
+using Xunit;
 
 namespace ToDoList.Test;
 
 public class DeleteTests : IDisposable
 {
+    private readonly SqliteConnection _connection;
+    private readonly ToDoItemsContext _context;
     private readonly ToDoItemsController _controller;
 
     public DeleteTests()
     {
-        _controller = new ToDoItemsController();
+        _connection = new SqliteConnection("DataSource=:memory:");
+        _connection.Open();
+
+        _context = new ToDoItemsContext("Data Source=../../../IntegrationTests/data/localdb_test.db");
+        _context.Database.EnsureCreated();
+
+        _controller = new ToDoItemsController(_context);
     }
 
     [Fact]
     public void Delete_DeletedItem_ReturnsOk()
     {
         // Arrange
-        ToDoItem todoItem = new ToDoItem
-        {
-            ToDoItemId = 1,
-            Name = "Utři nádobí",
-            Description = "Utři talíře a příbory",
-            IsCompleted = true
-        };
+        var itemToDelete = new ToDoItem { Name = "Položka ke smazání", Description = "Tato položka bude smazána", IsCompleted = false };
+        _context.ToDoItems.Add(itemToDelete);
+        _context.SaveChanges();
 
         // Act
-        _controller.AddItemToStorage(todoItem);
-        IActionResult actionResult = _controller.DeleteById(1);
+        IActionResult actionResult = _controller.DeleteById(itemToDelete.ToDoItemId);
 
         // Assert
         var noContentResult = Assert.IsType<NoContentResult>(actionResult);
         Assert.Equal(204, noContentResult.StatusCode);
+
+        var itemInDb = _context.ToDoItems.Find(itemToDelete.ToDoItemId);
+        Assert.Null(itemInDb);
     }
 
     [Fact]
