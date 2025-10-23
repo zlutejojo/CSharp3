@@ -27,8 +27,6 @@ public class ToDoItemsController : ControllerBase
         //try to create an item
         try
         {
-            // item.ToDoItemId = items.Count == 0 ? 1 : items.Max(o => o.ToDoItemId) + 1;
-            // items.Add(item);
             context.ToDoItems.Add(item);
             context.SaveChanges();
         }
@@ -47,22 +45,10 @@ public class ToDoItemsController : ControllerBase
     {
         try
         {
-            if (items == null)
-            {
-                return NotFound(); // 404
-            }
-
-            if (items.Count == 0)
-            {
-                return NotFound(); // 404
-            }
-
-            List<ToDoItemGetResponseDto> responseDtos = new List<ToDoItemGetResponseDto>();
-            foreach (ToDoItem item in items)
-            {
-                ToDoItemGetResponseDto dto = ToDoItemGetResponseDto.FromDomain(item);
-                responseDtos.Add(dto);
-            }
+            var responseDtos = context.ToDoItems
+                //převede každý ToDoItem z DB na ToDoItemGetResponseDto
+                .Select(item => ToDoItemGetResponseDto.FromDomain(item))
+                .ToList();
             return Ok(responseDtos); // 200
         }
         catch (Exception ex)
@@ -76,14 +62,9 @@ public class ToDoItemsController : ControllerBase
     {
         try
         {
-            ToDoItem item = items.Find(i => i.ToDoItemId == toDoItemId);
+            ToDoItem item = context.ToDoItems.Find(toDoItemId);
 
             if (item == null)
-            {
-                return NotFound(); // 404
-            }
-
-            if (items.Count == 0)
             {
                 return NotFound(); // 404
             }
@@ -103,14 +84,9 @@ public class ToDoItemsController : ControllerBase
     {
         try
         {
-            ToDoItem itemToUpdate = items.Find(i => i.ToDoItemId == toDoItemId);
+            ToDoItem itemToUpdate = context.ToDoItems.Find(toDoItemId);
 
             if (itemToUpdate == null)
-            {
-                return NotFound(); // 404
-            }
-
-            if (items.Count == 0)
             {
                 return NotFound(); // 404
             }
@@ -119,6 +95,8 @@ public class ToDoItemsController : ControllerBase
             itemToUpdate.Name = request.Name;
             itemToUpdate.Description = request.Description;
             itemToUpdate.IsCompleted = request.IsCompleted;
+
+            context.SaveChanges();
 
             var responseDto = ToDoItemGetResponseDto.FromDomain(itemToUpdate);
             return Ok(responseDto); // 200
@@ -134,19 +112,15 @@ public class ToDoItemsController : ControllerBase
     {
         try
         {
-            ToDoItem itemToDelete = items.Find(i => i.ToDoItemId == toDoItemId);
+            ToDoItem itemToDelete = context.ToDoItems.Find(toDoItemId);
 
             if (itemToDelete == null)
             {
                 return NotFound(); // 404
             }
 
-            if (items.Count == 0)
-            {
-                return NotFound(); // 404
-            }
-
-            items.Remove(itemToDelete);
+            context.ToDoItems.Remove(itemToDelete);
+            context.SaveChanges();
 
             return NoContent(); // 204
         }
