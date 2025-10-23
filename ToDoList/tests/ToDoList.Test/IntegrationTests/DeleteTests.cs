@@ -63,15 +63,6 @@ public class DeleteTests : IDisposable
     //mazání pomocí reflexe - vyčištění statického seznamu items v ToDoItemsController
     public void Dispose()
     {
-        var field = typeof(ToDoItemsController).GetField("items", BindingFlags.NonPublic | BindingFlags.Static);
-
-        if (field != null)
-        {
-            // Získáme hodnotu pole (což je náš List<ToDoItem>)
-            var list = field.GetValue(null) as List<ToDoItem>;
-
-            // Vyčistíme seznam kompletně
-            list?.Clear();
-        }
+        _connection.Close();
     }
 }
