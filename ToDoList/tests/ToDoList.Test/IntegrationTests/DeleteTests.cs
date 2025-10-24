@@ -11,14 +11,13 @@ namespace ToDoList.Test.IntegrationTests;
 
 public class DeleteTests : IDisposable
 {
-    private readonly SqliteConnection _connection;
     private readonly ToDoItemsContext _context;
     private readonly ToDoItemsController _controller;
 
     public DeleteTests()
     {
         _context = new ToDoItemsContext("Data Source=../../../IntegrationTests/data/localdb_test.db");
-        _context.Database.EnsureCreated();
+        // _context.Database.EnsureCreated();
 
         _controller = new ToDoItemsController(_context);
     }
