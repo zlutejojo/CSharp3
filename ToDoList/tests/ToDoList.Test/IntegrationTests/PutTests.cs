@@ -18,9 +18,6 @@ public class PutTests : IDisposable
 
     public PutTests()
     {
-        _connection = new SqliteConnection("DataSource=:memory:");
-        _connection.Open();
-
         _context = new ToDoItemsContext("Data Source=../../../IntegrationTests/data/localdb_test.db");
         _context.Database.EnsureCreated();
 

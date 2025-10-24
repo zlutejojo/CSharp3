@@ -7,7 +7,7 @@ using ToDoList.Persistence;
 using ToDoList.WebApi;
 using Xunit;
 
-namespace ToDoList.Test;
+namespace ToDoList.Test.IntegrationTests;
 
 public class DeleteTests : IDisposable
 {
@@ -17,9 +17,6 @@ public class DeleteTests : IDisposable
 
     public DeleteTests()
     {
-        _connection = new SqliteConnection("DataSource=:memory:");
-        _connection.Open();
-
         _context = new ToDoItemsContext("Data Source=../../../IntegrationTests/data/localdb_test.db");
         _context.Database.EnsureCreated();
 
@@ -63,6 +60,21 @@ public class DeleteTests : IDisposable
     //mazání pomocí reflexe - vyčištění statického seznamu items v ToDoItemsController
     public void Dispose()
     {
-        _connection.Close();
+        try
+        {
+            _context.ToDoItems.RemoveRange(_context.ToDoItems);
+            _context.SaveChanges();
+
+            // Resetujeme identity counter (auto-increment), aby další testy začínaly s ID 1
+            _context.Database.ExecuteSqlRaw("DELETE FROM sqlite_sequence WHERE name='ToDoItems'");
+        }
+        catch (Exception)
+        {
+
+        }
+        finally
+        {
+            _context?.Dispose();
+        }
     }
 }
