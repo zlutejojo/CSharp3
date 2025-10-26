@@ -1,7 +1,7 @@
 namespace ToDoList.Test.IntegrationTests;
 
-using System.Reflection;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using ToDoList.Domain.DTOs;
 using ToDoList.Domain.Models;
 using ToDoList.Persistence;
@@ -18,9 +18,9 @@ public class GetTests : IDisposable
     public GetTests()
     {
         _context = new ToDoItemsContext("Data Source=../../../IntegrationTests/data/localdb_test.db");
-        _context.Database.EnsureCreated();
-
         _controller = new ToDoItemsController(_context);
+        _context.ToDoItems.RemoveRange(_context.ToDoItems);
+        _context.SaveChanges();
     }
 
     [Fact]
@@ -76,6 +76,7 @@ public class GetTests : IDisposable
         {
             _context.ToDoItems.RemoveRange(_context.ToDoItems);
             _context.SaveChanges();
+            _context.Database.ExecuteSqlRaw("DELETE FROM sqlite_sequence WHERE name='ToDoItems'");
         }
         catch (Exception)
         {

@@ -1,54 +1,65 @@
 using System;
-using System.Reflection;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using ToDoList.Domain.DTOs;
-using ToDoList.Domain.Models;
+using ToDoList.Persistence;
 using ToDoList.WebApi;
 
 
-namespace ToDoList.Test;
+namespace ToDoList.Test.IntegrationTests;
 
 public class PostTests : IDisposable
 {
-    ToDoItemsController controller;
+    private readonly ToDoItemsContext _context;
+    private readonly ToDoItemsController _controller;
+
+    public PostTests()
+    {
+        _context = new ToDoItemsContext("Data Source=../../../IntegrationTests/data/localdb_test.db");
+        _controller = new ToDoItemsController(_context);
+    }
 
     [Fact]
     public void Post_CreateItem_ReturnsCreatedResponse()
     {
-        // // Arrange
-        // controller = new ToDoItemsController();
-        // var request = new ToDoItemCreateRequestDto("Vyper", "vyper barevné oblečení", false);
+        // Arrange
+        var request = new ToDoItemCreateRequestDto("Utři prach", "utři prach z poliček", false);
 
-        // // Act
-        // IActionResult actionResult = controller.Create(request);
+        // Act
+        var actionResult = _controller.Create(request);
+        var getResult = _controller.Read();
 
-        // var getResult = controller.Read();
+        // Assert
+        var createdResult = Assert.IsType<CreatedResult>(actionResult);
+        Assert.Equal(201, createdResult.StatusCode);
+        
+        // Zkontrolujeme, že data položky v seznamu odpovídají tomu, co jsme vytvořili
+        var okResult = Assert.IsType<OkObjectResult>(getResult.Result);
+        var returnedList = Assert.IsAssignableFrom<IEnumerable<ToDoItemGetResponseDto>>(okResult.Value);
 
-        // //ověření, zda zavolání metody Create přidalo položku do seznamu úkolů items
-        // // Zkontroluje, že výsledek je typu OkObjectResult a zároveň ho přetypuje (abych se dostala k hodnotě value)
-        // var okResult = Assert.IsType<OkObjectResult>(getResult.Result);
-        // // Zkontroluje, zda objekt uložený v okResult.Value je kompatibilní s typem IEnumerable<ToDoItemGetResponseDto> a zároveň ho přetypuje
-        // var returnedList = Assert.IsAssignableFrom<IEnumerable<ToDoItemGetResponseDto>>(okResult.Value);
-
-        // // Zkontrolujeme, že data položky v seznamu odpovídají tomu, co jsme vytvořili
-        // Assert.Equal(request.Name, returnedList.First().Name);
-        // Assert.Equal(request.Description, returnedList.First().Description);
-        // Assert.Equal(request.IsCompleted, returnedList.First().IsCompleted);
-        // // Ověření, že bylo vygenerováno nějaké ID
-        // Assert.True(returnedList.First().Id > 0);
+        // Zkontrolujeme, že data položky v seznamu odpovídají tomu, co jsme vytvořili
+        Assert.Equal(request.Name, returnedList.First().Name);
+        Assert.Equal(request.Description, returnedList.First().Description);
+        Assert.Equal(request.IsCompleted, returnedList.First().IsCompleted);
+        // Ověření, že bylo vygenerováno nějaké ID
+        Assert.True(returnedList.First().Id > 0);
     }
     //mazání pomocí reflexe - vyčištění statického seznamu items v ToDoItemsController
     public void Dispose()
     {
-        var field = typeof(ToDoItemsController).GetField("items", BindingFlags.NonPublic | BindingFlags.Static);
-
-        if (field != null)
+        try
         {
-            // Získáme hodnotu pole (což je náš List<ToDoItem>)
-            var list = field.GetValue(null) as List<ToDoItem>;
-
-            // Vyčistíme seznam kompletně
-            list?.Clear();
+            _context.ToDoItems.RemoveRange(_context.ToDoItems);
+            _context.SaveChanges();
+            //Reset ID počítače pro další testy
+            _context.Database.ExecuteSqlRaw("DELETE FROM sqlite_sequence WHERE name='ToDoItems'");
+        }
+        catch (Exception)
+        {
+        }
+        finally
+        {
+            _context?.Dispose();
         }
     }
 }

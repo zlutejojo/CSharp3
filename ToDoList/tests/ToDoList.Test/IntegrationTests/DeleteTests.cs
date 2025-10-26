@@ -1,11 +1,9 @@
-using System;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using ToDoList.Domain.Models;
 using ToDoList.Persistence;
 using ToDoList.WebApi;
-using Xunit;
+
 
 namespace ToDoList.Test.IntegrationTests;
 
@@ -17,8 +15,6 @@ public class DeleteTests : IDisposable
     public DeleteTests()
     {
         _context = new ToDoItemsContext("Data Source=../../../IntegrationTests/data/localdb_test.db");
-        // _context.Database.EnsureCreated();
-
         _controller = new ToDoItemsController(_context);
     }
 
