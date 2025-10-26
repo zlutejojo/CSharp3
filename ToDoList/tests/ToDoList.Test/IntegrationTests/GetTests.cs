@@ -19,8 +19,6 @@ public class GetTests : IDisposable
     {
         _context = new ToDoItemsContext("Data Source=../../../IntegrationTests/data/localdb_test.db");
         _controller = new ToDoItemsController(_context);
-        _context.ToDoItems.RemoveRange(_context.ToDoItems);
-        _context.SaveChanges();
     }
 
     [Fact]

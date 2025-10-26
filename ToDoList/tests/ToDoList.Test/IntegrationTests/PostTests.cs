@@ -30,7 +30,7 @@ public class PostTests : IDisposable
         var getResult = _controller.Read();
 
         // Assert
-        var createdResult = Assert.IsType<CreatedResult>(actionResult);
+        var createdResult = Assert.IsType<CreatedAtActionResult>(actionResult);
         Assert.Equal(201, createdResult.StatusCode);
         
         // Zkontrolujeme, že data položky v seznamu odpovídají tomu, co jsme vytvořili

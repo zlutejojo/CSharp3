@@ -37,7 +37,10 @@ public class ToDoItemsController : ControllerBase
 
         //respond to client
         ToDoItemGetResponseDto responseDto = ToDoItemGetResponseDto.FromDomain(item);
-        return Created();
+        return CreatedAtAction(
+            nameof(ReadById),
+            new { toDoItemId = item.ToDoItemId },
+            responseDto);
     }
 
     [HttpGet]
