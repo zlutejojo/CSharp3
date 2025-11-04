@@ -19,15 +19,15 @@ POST {{host}}:{{port}}/api/ToDoItems
 Content-Type: application/json
 
 {
-  "name": "Programuj",
-  "description": "Vypracuj úkoly z C#",
+  "name": "programuj",
+  "description": "vypracuj úkol do C#",
   "isCompleted": false
 }
 
 ###
 
 //Update existing ToDoItem by id
-@itemToUpdateId = 1
+@itemToUpdateId = 2
 
 PUT {{host}}:{{port}}/api/ToDoItems/{{itemToUpdateId}}
 Content-Type: application/json
