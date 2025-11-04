@@ -16,11 +16,16 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\ToDoList.Domain\ToDoList.Domain.csproj" />
+    <ProjectReference Include="..\..\src\ToDoList.Persistence\ToDoList.Persistence.csproj" />
     <ProjectReference Include="..\..\src\ToDoList.WebApi\ToDoList.WebApi.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <Using Include="Xunit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="IntegrationTests\data\" />
   </ItemGroup>
 
 </Project>
