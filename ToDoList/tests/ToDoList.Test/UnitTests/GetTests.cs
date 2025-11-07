@@ -2,23 +2,25 @@ namespace ToDoList.Test.UnitTests;
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using NSubstitute;
 using ToDoList.Domain.DTOs;
 using ToDoList.Domain.Models;
 using ToDoList.Persistence;
+using ToDoList.Persistence.Repositories;
 using ToDoList.WebApi;
 
 public class GetTests
 {
-    private readonly ToDoItemsContext _context;
-    private readonly ToDoItemsController _controller;
+    private readonly IRepository<ToDoItem> repositoryMock;
+    private readonly ToDoItemsController controller;
 
     public ToDoItem todoItem1;
     public ToDoItem todoItem2;
 
     public GetTests()
     {
-        _context = new ToDoItemsContext("Data Source=../../../IntegrationTests/data/localdb_test.db");
-        _controller = new ToDoItemsController(_context);
+        repositoryMock = Substitute.For<IRepository<ToDoItem>>();
+        controller = new ToDoItemsController(repositoryMock);
     }
 
     [Fact]
@@ -40,12 +42,12 @@ public class GetTests
             Description = "Umyj talíře a příbory",
             IsCompleted = true
         };
-        _context.ToDoItems.Add(todoItem1);
-        _context.ToDoItems.Add(todoItem2);
-        _context.SaveChanges();
+
+        var items = new List<ToDoItem> { todoItem1, todoItem2 };
+        repositoryMock.GetAll().Returns(items);
 
         // Act
-        var actionResult = _controller.Read();
+        var actionResult = controller.Read();
 
 
         // Assert
