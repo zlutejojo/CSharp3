@@ -5,6 +5,7 @@ using ToDoList.Domain.Models;
 using ToDoList.Domain.DTOs;
 using ToDoList.Persistence;
 using Humanizer;
+using ToDoList.Persistence.Repositories;
 
 [Route("api/[controller]")] //localhost:5000/api/ToDoItems
 [ApiController]
@@ -12,11 +13,18 @@ public class ToDoItemsController : ControllerBase
 {
 
     private static readonly List<ToDoItem> items = [];
-    private readonly ToDoItemsContext context;
+    // private readonly ToDoItemsContext context;
+    private readonly IRepository<ToDoItem> repository;
 
-    public ToDoItemsController(ToDoItemsContext context)
+    // public ToDoItemsController(ToDoItemsContext context, IRepository<ToDoItem> repository)
+    // {
+    //     this.context = context;
+    //     this.repository = repository;
+    // }
+
+    public ToDoItemsController(IRepository<ToDoItem> repository)
     {
-        this.context = context;
+        this.repository = repository;
     }
 
     [HttpPost]
@@ -27,8 +35,7 @@ public class ToDoItemsController : ControllerBase
         //try to create an item
         try
         {
-            context.ToDoItems.Add(item);
-            context.SaveChanges();
+            repository.Create(item);
         }
         catch (Exception ex)
         {

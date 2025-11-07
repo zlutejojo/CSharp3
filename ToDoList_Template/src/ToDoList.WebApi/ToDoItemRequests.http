@@ -19,9 +19,15 @@ POST {{host}}:{{port}}/api/ToDoItems
 Content-Type: application/json
 
 {
+<<<<<<< HEAD:ToDoList_Template/src/ToDoList.WebApi/Controllers/ToDoItemRequests.http
   "name": "programuj",
   "description": "vypracuj úkol do C#",
   "isCompleted": false
+=======
+  "name": "Example New Task",
+  "description": "Example New Description",
+  "isCompleted": true
+>>>>>>> 06_lesson:ToDoList_Template/src/ToDoList.WebApi/ToDoItemRequests.http
 }
 
 ###

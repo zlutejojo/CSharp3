@@ -1,8 +1,12 @@
-namespace ToDoList.Test;
+namespace ToDoList.Test.UnitTests;
 
+using NSubstitute;
 using Microsoft.AspNetCore.Mvc;
 using ToDoList.Domain.DTOs;
 using ToDoList.WebApi.Controllers;
+using ToDoList.Persistence.Repositories;
+using ToDoList.Domain.Models;
+using ToDoList.Test;
 
 public class PostTests
 {
@@ -10,7 +14,9 @@ public class PostTests
     public void Post_ValidRequest_ReturnsNewItem()
     {
         // Arrange
-        var controller = new ToDoItemsController();
+        var repositoryMock = Substitute.For<IRepository<ToDoItem>>();
+
+        var controller = new ToDoItemsController(null, repositoryMock);
         var request = new ToDoItemCreateRequestDto(
             Name: "Jmeno",
             Description: "Popis",
@@ -31,3 +37,4 @@ public class PostTests
         Assert.Equal(request.Name, value.Name);
     }
 }
+

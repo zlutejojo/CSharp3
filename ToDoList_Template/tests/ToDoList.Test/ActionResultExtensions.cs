@@ -8,3 +8,4 @@ public static class ActionResultExtensions
         ? result.Value
         : (T?)(result.Result as ObjectResult)?.Value;
 }
+
