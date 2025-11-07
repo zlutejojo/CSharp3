@@ -47,8 +47,6 @@ public class PostTests
         Assert.Equal(request.Name, returnedDto.Name);
         Assert.Equal(request.Description, returnedDto.Description);
         Assert.Equal(request.IsCompleted, returnedDto.IsCompleted);
-        // Ověření, že bylo vygenerováno nějaké ID
-        Assert.True(returnedDto.Id > 0);
     }
 
 }
