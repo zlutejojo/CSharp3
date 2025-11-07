@@ -36,23 +36,19 @@ public class PostTests
         // Act
         IActionResult actionResult = controller.Create(request);
 
-        var getResult = controller.Read();
-
         // Assert
         // ověření, že metoda Create byla zavolána jednou s libovolnou položkou ToDoItem
         repositoryMock.Received(1).Create(Arg.Any<ToDoItem>());
-        //ověření, zda zavolání metody Create přidalo položku do seznamu úkolů items
-        // Zkontroluje, že výsledek je typu OkObjectResult a zároveň ho přetypuje (abych se dostala k hodnotě value)
-        var okResult = Assert.IsType<OkObjectResult>(getResult.Result);
-        // Zkontroluje, zda objekt uložený v okResult.Value je kompatibilní s typem IEnumerable<ToDoItemGetResponseDto> a zároveň ho přetypuje
-        var returnedList = Assert.IsAssignableFrom<IEnumerable<ToDoItemGetResponseDto>>(okResult.Value);
+        var createdResult = Assert.IsType<CreatedAtActionResult>(actionResult);
 
-        // Zkontrolujeme, že data položky v seznamu odpovídají tomu, co jsme vytvořili
-        Assert.Equal(request.Name, returnedList.First().Name);
-        Assert.Equal(request.Description, returnedList.First().Description);
-        Assert.Equal(request.IsCompleted, returnedList.First().IsCompleted);
+        var returnedDto = Assert.IsType<ToDoItemGetResponseDto>(createdResult.Value);
+
+        // ověříme, že odpověď obsahuje správná data
+        Assert.Equal(request.Name, returnedDto.Name);
+        Assert.Equal(request.Description, returnedDto.Description);
+        Assert.Equal(request.IsCompleted, returnedDto.IsCompleted);
         // Ověření, že bylo vygenerováno nějaké ID
-        Assert.True(returnedList.First().Id > 0);
+        Assert.True(returnedDto.Id > 0);
     }
 
 }

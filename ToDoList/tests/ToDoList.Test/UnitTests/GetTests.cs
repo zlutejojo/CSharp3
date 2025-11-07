@@ -51,6 +51,8 @@ public class GetTests
 
 
         // Assert
+        repositoryMock.Received(1).GetAll();
+
         // ověření, že akce vrátila správný typ odpovědi OK 200, zároveň přetypuje na OkObjectResult
         var okResult = Assert.IsType<OkObjectResult>(actionResult.Result);
         var returnedItems = Assert.IsAssignableFrom<IEnumerable<ToDoItemGetResponseDto>>(okResult.Value);
