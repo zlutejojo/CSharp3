@@ -1,6 +1,3 @@
-using System;
-using Humanizer;
-
 namespace ToDoList.Persistence.Repositories;
 
 public interface IRepository<T>

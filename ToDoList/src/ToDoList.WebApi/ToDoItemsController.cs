@@ -13,12 +13,17 @@ public class ToDoItemsController : ControllerBase
 {
 
     private static readonly List<ToDoItem> items = [];
-    private readonly ToDoItemsContext context;
+    // private readonly ToDoItemsContext context;
     private readonly IRepository<ToDoItem> repository;
 
-    public ToDoItemsController(ToDoItemsContext context, IRepository<ToDoItem> repository)
+    // public ToDoItemsController(ToDoItemsContext context, IRepository<ToDoItem> repository)
+    // {
+    //     this.context = context;
+    //     this.repository = repository;
+    // }
+
+    public ToDoItemsController(IRepository<ToDoItem> repository)
     {
-        this.context = context;
         this.repository = repository;
     }
 
