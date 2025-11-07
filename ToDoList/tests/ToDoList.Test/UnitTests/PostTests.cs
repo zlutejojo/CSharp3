@@ -1,5 +1,3 @@
-using System;
-using System.Reflection;
 using Microsoft.AspNetCore.Mvc;
 using NSubstitute;
 using ToDoList.Domain.DTOs;
@@ -40,6 +38,9 @@ public class PostTests
 
         var getResult = controller.Read();
 
+        // Assert
+        // ověření, že metoda Create byla zavolána jednou s libovolnou položkou ToDoItem
+        repositoryMock.Received(1).Create(Arg.Any<ToDoItem>());
         //ověření, zda zavolání metody Create přidalo položku do seznamu úkolů items
         // Zkontroluje, že výsledek je typu OkObjectResult a zároveň ho přetypuje (abych se dostala k hodnotě value)
         var okResult = Assert.IsType<OkObjectResult>(getResult.Result);
