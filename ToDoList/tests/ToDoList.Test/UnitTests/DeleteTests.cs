@@ -21,7 +21,7 @@ public class DeleteTests
     }
 
     [Fact]
-    public void Delete_DeletedItem_ReturnsOk()
+    public void Delete_DeletedItem_ReturnsNoContent()
     {
         // Arrange
         int existingId = 1;

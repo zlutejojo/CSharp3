@@ -30,8 +30,6 @@ public class PostTests
             Description = request.Description,
             IsCompleted = request.IsCompleted
         };
-        //nastavení mocku, aby při volání metody GetAll vracel seznam s jednou položkou
-        repositoryMock.GetAll().Returns(new List<ToDoItem> { itemInDb });
 
         // Act
         IActionResult actionResult = controller.Create(request);

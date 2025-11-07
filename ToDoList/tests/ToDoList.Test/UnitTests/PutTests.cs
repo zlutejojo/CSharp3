@@ -33,9 +33,9 @@ public class PutTests
 
         // Act
         var actionResult = controller.UpdateById(existingId, request);
-        repositoryMock.Received(1).Update(originalItem);
 
         // Assert
+        repositoryMock.Received(1).Update(originalItem);
         var okResult = Assert.IsType<OkObjectResult>(actionResult);
         Assert.Equal(200, okResult.StatusCode);
 
@@ -55,6 +55,7 @@ public class PutTests
         var request = new ToDoItemUpdateRequestDto("Nic", "Nic", false);
         //předpokládám, že v seznamu není žádná položka s tímto ID
         int nonExistentId = 99999;
+        repositoryMock.GetById(nonExistentId).Returns((ToDoItem)null);
 
         // Act
         // Zavoláme metodu pro update s neexistujícím ID.
@@ -63,5 +64,6 @@ public class PutTests
         // Assert
         var notFoundResult = Assert.IsType<NotFoundResult>(actionResult);
         Assert.Equal(404, notFoundResult.StatusCode);
+        repositoryMock.DidNotReceive().Update(Arg.Any<ToDoItem>());
     }
 }
