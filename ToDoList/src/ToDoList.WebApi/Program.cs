@@ -5,6 +5,7 @@ var builder = WebApplication.CreateBuilder(args);
     //Configure DI
     builder.Services.AddControllers();
     builder.Services.AddDbContext<ToDoItemsContext>();
+    builder.Services.AddScoped<IRepository<ToDoItem>, ToDoItemsRepository>();
 }
 
 var app = builder.Build();
