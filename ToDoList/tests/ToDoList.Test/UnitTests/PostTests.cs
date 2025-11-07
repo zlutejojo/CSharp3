@@ -10,15 +10,30 @@ using ToDoList.WebApi;
 
 namespace ToDoList.Test.UnitTests;
 
-public class PostTests : IDisposable
+public class PostTests
 {
 
     [Fact]
     public void Post_CreateItem_ReturnsCreatedResponse()
     {
         // Arrange
-        var repositoryMock = Substitute.For<IRepository<ToDoItem>>();
-        var controller = new ToDoItemsController(null, repositoryMock);
+        IRepository<ToDoItem> repositoryMock = Substitute.For<IRepository<ToDoItem>>();
+        ToDoItemsController controller = new ToDoItemsController(repositoryMock);
+        ToDoItemCreateRequestDto request = new ToDoItemCreateRequestDto(
+            Name: "Uvař oběd",
+            Description: "Udělej pečené kuře s rýží",
+            IsCompleted: false
+        );
+        //připravíme doménový objekt
+        ToDoItem itemInDb = new ToDoItem
+        {
+            ToDoItemId = 1,
+            Name = request.Name,
+            Description = request.Description,
+            IsCompleted = request.IsCompleted
+        };
+        //nastavení mocku, aby při volání metody GetAll vracel seznam s jednou položkou
+        repositoryMock.GetAll().Returns(new List<ToDoItem> { itemInDb });
 
         // Act
         IActionResult actionResult = controller.Create(request);
@@ -38,18 +53,5 @@ public class PostTests : IDisposable
         // Ověření, že bylo vygenerováno nějaké ID
         Assert.True(returnedList.First().Id > 0);
     }
-    //mazání pomocí reflexe - vyčištění statického seznamu items v ToDoItemsController
-    public void Dispose()
-    {
-        var field = typeof(ToDoItemsController).GetField("items", BindingFlags.NonPublic | BindingFlags.Static);
 
-        if (field != null)
-        {
-            // Získáme hodnotu pole (což je náš List<ToDoItem>)
-            var list = field.GetValue(null) as List<ToDoItem>;
-
-            // Vyčistíme seznam kompletně
-            list?.Clear();
-        }
-    }
 }

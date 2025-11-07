@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using ToDoList.Domain.Models;
 using ToDoList.Domain.DTOs;
 using ToDoList.Persistence.Repositories;
+using ToDoList.Persistence;
 
 [Route("api/[controller]")] //localhost:5000/api/ToDoItems
 [ApiController]
@@ -11,14 +12,13 @@ public class ToDoItemsController : ControllerBase
 {
 
     private static readonly List<ToDoItem> items = [];
-    // private readonly ToDoItemsContext context;
+    private readonly ToDoItemsContext context;
     private readonly IRepository<ToDoItem> repository;
 
-    // public ToDoItemsController(ToDoItemsContext context, IRepository<ToDoItem> repository)
-    // {
-    //     this.context = context;
-    //     this.repository = repository;
-    // }
+    public ToDoItemsController(ToDoItemsContext context)
+    {
+        this.context = context;
+    }
 
     public ToDoItemsController(IRepository<ToDoItem> repository)
     {
