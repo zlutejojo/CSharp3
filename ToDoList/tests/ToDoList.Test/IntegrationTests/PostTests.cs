@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ToDoList.Domain.DTOs;
 using ToDoList.Persistence;
+using ToDoList.Persistence.Repositories;
 using ToDoList.WebApi;
 
 
@@ -10,13 +11,15 @@ namespace ToDoList.Test.IntegrationTests;
 
 public class PostTests : IDisposable
 {
-    private readonly ToDoItemsContext _context;
-    private readonly ToDoItemsController _controller;
+    private readonly ToDoItemsContext context;
+    private readonly ToDoItemsController controller;
+    private readonly ToDoItemsRepository repository;
 
     public PostTests()
     {
-        _context = new ToDoItemsContext("Data Source=../../../IntegrationTests/data/localdb_test.db");
-        _controller = new ToDoItemsController(_context);
+        context = new ToDoItemsContext("Data Source=../../../IntegrationTests/data/localdb_test.db");
+        repository = new ToDoItemsRepository(context);
+        controller = new ToDoItemsController(repository);
     }
 
     [Fact]
@@ -26,13 +29,13 @@ public class PostTests : IDisposable
         var request = new ToDoItemCreateRequestDto("Utři prach", "utři prach z poliček", false);
 
         // Act
-        var actionResult = _controller.Create(request);
-        var getResult = _controller.Read();
+        var actionResult = controller.Create(request);
+        var getResult = controller.Read();
 
         // Assert
         var createdResult = Assert.IsType<CreatedAtActionResult>(actionResult);
         Assert.Equal(201, createdResult.StatusCode);
-        
+
         // Zkontrolujeme, že data položky v seznamu odpovídají tomu, co jsme vytvořili
         var okResult = Assert.IsType<OkObjectResult>(getResult.Result);
         var returnedList = Assert.IsAssignableFrom<IEnumerable<ToDoItemGetResponseDto>>(okResult.Value);
@@ -49,17 +52,17 @@ public class PostTests : IDisposable
     {
         try
         {
-            _context.ToDoItems.RemoveRange(_context.ToDoItems);
-            _context.SaveChanges();
+            context.ToDoItems.RemoveRange(context.ToDoItems);
+            context.SaveChanges();
             //Reset ID počítače pro další testy
-            _context.Database.ExecuteSqlRaw("DELETE FROM sqlite_sequence WHERE name='ToDoItems'");
+            context.Database.ExecuteSqlRaw("DELETE FROM sqlite_sequence WHERE name='ToDoItems'");
         }
         catch (Exception)
         {
         }
         finally
         {
-            _context?.Dispose();
+            context?.Dispose();
         }
     }
 }
