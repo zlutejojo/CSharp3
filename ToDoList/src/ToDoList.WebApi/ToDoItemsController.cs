@@ -11,14 +11,7 @@ using ToDoList.Persistence;
 public class ToDoItemsController : ControllerBase
 {
 
-    private static readonly List<ToDoItem> items = [];
-    private readonly ToDoItemsContext context;
     private readonly IRepository<ToDoItem> repository;
-
-    public ToDoItemsController(ToDoItemsContext context)
-    {
-        this.context = context;
-    }
 
     public ToDoItemsController(IRepository<ToDoItem> repository)
     {

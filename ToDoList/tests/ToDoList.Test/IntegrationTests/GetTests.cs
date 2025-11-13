@@ -5,20 +5,23 @@ using Microsoft.EntityFrameworkCore;
 using ToDoList.Domain.DTOs;
 using ToDoList.Domain.Models;
 using ToDoList.Persistence;
+using ToDoList.Persistence.Repositories;
 using ToDoList.WebApi;
 
 public class GetTests : IDisposable
 {
-    private readonly ToDoItemsContext _context;
-    private readonly ToDoItemsController _controller;
+    private readonly ToDoItemsContext context;
+    private readonly ToDoItemsController controller;
+    private readonly ToDoItemsRepository repository;
 
     public ToDoItem todoItem1;
     public ToDoItem todoItem2;
 
     public GetTests()
     {
-        _context = new ToDoItemsContext("Data Source=../../../IntegrationTests/data/localdb_test.db");
-        _controller = new ToDoItemsController(_context);
+        context = new ToDoItemsContext("Data Source=../../../IntegrationTests/data/localdb_test.db");
+        repository = new ToDoItemsRepository(context);
+        controller = new ToDoItemsController(repository);
     }
 
     [Fact]
@@ -40,19 +43,20 @@ public class GetTests : IDisposable
             Description = "Umyj talíře a příbory",
             IsCompleted = true
         };
-        _context.ToDoItems.Add(todoItem1);
-        _context.ToDoItems.Add(todoItem2);
-        _context.SaveChanges();
+        context.ToDoItems.Add(todoItem1);
+        context.ToDoItems.Add(todoItem2);
+        context.SaveChanges();
 
         // Act
-        var actionResult = _controller.Read();
+        var actionResult = controller.Read();
 
 
         // Assert
         // ověření, že akce vrátila správný typ odpovědi OK 200, zároveň přetypuje na OkObjectResult
-        var okResult = Assert.IsType<OkObjectResult>(actionResult.Result);
-        var returnedItems = Assert.IsAssignableFrom<IEnumerable<ToDoItemGetResponseDto>>(okResult.Value);
+        var objectResult = Assert.IsType<ObjectResult>(actionResult.Result);
+        Assert.Equal(200, objectResult.StatusCode);
 
+        var returnedItems = Assert.IsAssignableFrom<IEnumerable<ToDoItemGetResponseDto>>(okResult.Value);
         var itemsList = returnedItems.ToList();
         Assert.Equal(2, itemsList.Count);
 
@@ -72,9 +76,9 @@ public class GetTests : IDisposable
     {
         try
         {
-            _context.ToDoItems.RemoveRange(_context.ToDoItems);
-            _context.SaveChanges();
-            _context.Database.ExecuteSqlRaw("DELETE FROM sqlite_sequence WHERE name='ToDoItems'");
+            context.ToDoItems.RemoveRange(context.ToDoItems);
+            context.SaveChanges();
+            context.Database.ExecuteSqlRaw("DELETE FROM sqlite_sequence WHERE name='ToDoItems'");
         }
         catch (Exception)
         {
@@ -82,7 +86,7 @@ public class GetTests : IDisposable
         }
         finally
         {
-            _context?.Dispose();
+            context?.Dispose();
         }
     }
 }
