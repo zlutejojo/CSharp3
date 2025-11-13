@@ -10,13 +10,19 @@ namespace ToDoList.Test.UnitTests;
 
 public class PostTests
 {
+    private readonly IRepository<ToDoItem> repositoryMock;
+    private readonly ToDoItemsController controller;
+
+    public PostTests()
+    {
+        repositoryMock = Substitute.For<IRepository<ToDoItem>>();
+        controller = new ToDoItemsController(repositoryMock);
+    }
 
     [Fact]
     public void Post_CreateValidRequest_ReturnsCreatedAtAction()
     {
         // Arrange
-        IRepository<ToDoItem> repositoryMock = Substitute.For<IRepository<ToDoItem>>();
-        ToDoItemsController controller = new ToDoItemsController(repositoryMock);
         ToDoItemCreateRequestDto request = new ToDoItemCreateRequestDto(
             Name: "Uvař oběd",
             Description: "Udělej pečené kuře s rýží",
@@ -51,7 +57,6 @@ public class PostTests
     public void Post_CreateUnhandledException_ReturnsInternalServerError()
     {
         // Arrange
-        var repositoryMock = Substitute.For<IRepository<ToDoItem>>();
         var exceptionMessage = "Database connection failed";
 
         repositoryMock.When(x => x.Create(Arg.Any<ToDoItem>()))
