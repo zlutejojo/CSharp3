@@ -53,8 +53,8 @@ public class GetTests : IDisposable
 
         // Assert
         // ověření, že akce vrátila správný typ odpovědi OK 200, zároveň přetypuje na OkObjectResult
-        var objectResult = Assert.IsType<ObjectResult>(actionResult.Result);
-        Assert.Equal(200, objectResult.StatusCode);
+        var okResult = Assert.IsType<OkObjectResult>(actionResult.Result);
+        Assert.Equal(200, okResult.StatusCode);
 
         var returnedItems = Assert.IsAssignableFrom<IEnumerable<ToDoItemGetResponseDto>>(okResult.Value);
         var itemsList = returnedItems.ToList();

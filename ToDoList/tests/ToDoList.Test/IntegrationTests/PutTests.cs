@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using ToDoList.Domain.DTOs;
 using ToDoList.Domain.Models;
 using ToDoList.Persistence;
+using ToDoList.Persistence.Repositories;
 using ToDoList.WebApi;
 
 
@@ -11,13 +12,15 @@ namespace ToDoList.Test.IntegrationTests;
 
 public class PutTests : IDisposable
 {
-    private readonly ToDoItemsContext _context;
-    private readonly ToDoItemsController _controller;
+    private readonly ToDoItemsContext context;
+    private readonly ToDoItemsController controller;
+    private readonly ToDoItemsRepository repository;
 
     public PutTests()
     {
-        _context = new ToDoItemsContext("Data Source=../../../IntegrationTests/data/localdb_test.db");
-        _controller = new ToDoItemsController(_context);
+        context = new ToDoItemsContext("Data Source=../../../IntegrationTests/data/localdb_test.db");
+        repository = new ToDoItemsRepository(context);
+        controller = new ToDoItemsController(repository);
     }
 
     [Fact]
@@ -25,13 +28,13 @@ public class PutTests : IDisposable
     {
         // Arrange
         var originalItem = new ToDoItem { Name = "Vyper", Description = "Vyper barevné prádlo" };
-        _context.ToDoItems.Add(originalItem);
-        _context.SaveChanges();
+        context.ToDoItems.Add(originalItem);
+        context.SaveChanges();
 
         var request = new ToDoItemUpdateRequestDto("Vyper", "Vyper bílé prádlo", true);
 
         // Act
-        var actionResult = _controller.UpdateById(originalItem.ToDoItemId, request);
+        var actionResult = controller.UpdateById(originalItem.ToDoItemId, request);
 
         // Assert
         var okResult = Assert.IsType<OkObjectResult>(actionResult);
@@ -56,7 +59,7 @@ public class PutTests : IDisposable
 
         // Act
         // Zavoláme metodu pro update s neexistujícím ID.
-        IActionResult actionResult = _controller.UpdateById(nonExistentId, request);
+        IActionResult actionResult = controller.UpdateById(nonExistentId, request);
 
         // Assert
         var notFoundResult = Assert.IsType<NotFoundResult>(actionResult);
@@ -68,11 +71,11 @@ public class PutTests : IDisposable
     {
         try
         {
-            _context.ToDoItems.RemoveRange(_context.ToDoItems);
-            _context.SaveChanges();
+            context.ToDoItems.RemoveRange(context.ToDoItems);
+            context.SaveChanges();
 
             // Resetujeme identity counter (auto-increment), aby další testy začínaly s ID 1
-            _context.Database.ExecuteSqlRaw("DELETE FROM sqlite_sequence WHERE name='ToDoItems'");
+            context.Database.ExecuteSqlRaw("DELETE FROM sqlite_sequence WHERE name='ToDoItems'");
         }
         catch (Exception)
         {
@@ -80,7 +83,7 @@ public class PutTests : IDisposable
         }
         finally
         {
-            _context?.Dispose();
+            context?.Dispose();
         }
     }
 }
