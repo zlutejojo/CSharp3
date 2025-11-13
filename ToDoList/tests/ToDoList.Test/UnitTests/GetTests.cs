@@ -1,27 +1,26 @@
-namespace ToDoList.Test.IntegrationTests;
+namespace ToDoList.Test.UnitTests;
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using NSubstitute;
 using ToDoList.Domain.DTOs;
 using ToDoList.Domain.Models;
 using ToDoList.Persistence;
 using ToDoList.Persistence.Repositories;
 using ToDoList.WebApi;
 
-public class GetTests : IDisposable
+public class GetTests
 {
-    private readonly ToDoItemsContext context;
+    private readonly IRepository<ToDoItem> repositoryMock;
     private readonly ToDoItemsController controller;
-    private readonly ToDoItemsRepository repository;
 
     public ToDoItem todoItem1;
     public ToDoItem todoItem2;
 
     public GetTests()
     {
-        context = new ToDoItemsContext("Data Source=../../../IntegrationTests/data/localdb_test.db");
-        repository = new ToDoItemsRepository(context);
-        controller = new ToDoItemsController(repository);
+        repositoryMock = Substitute.For<IRepository<ToDoItem>>();
+        controller = new ToDoItemsController(repositoryMock);
     }
 
     [Fact]
@@ -43,20 +42,21 @@ public class GetTests : IDisposable
             Description = "Umyj talíře a příbory",
             IsCompleted = true
         };
-        context.ToDoItems.Add(todoItem1);
-        context.ToDoItems.Add(todoItem2);
-        context.SaveChanges();
+
+        var items = new List<ToDoItem> { todoItem1, todoItem2 };
+        repositoryMock.GetAll().Returns(items);
 
         // Act
         var actionResult = controller.Read();
 
 
         // Assert
+        repositoryMock.Received(1).GetAll();
+
         // ověření, že akce vrátila správný typ odpovědi OK 200, zároveň přetypuje na OkObjectResult
         var okResult = Assert.IsType<OkObjectResult>(actionResult.Result);
-        Assert.Equal(200, okResult.StatusCode);
-
         var returnedItems = Assert.IsAssignableFrom<IEnumerable<ToDoItemGetResponseDto>>(okResult.Value);
+
         var itemsList = returnedItems.ToList();
         Assert.Equal(2, itemsList.Count);
 
@@ -72,21 +72,45 @@ public class GetTests : IDisposable
         Assert.Equal(todoItem2.IsCompleted, secondItem.IsCompleted);
     }
 
-    public void Dispose()
+    [Fact]
+    public void Get_ById_ExistingItem_ReturnsOkWithItem()
     {
-        try
-        {
-            context.ToDoItems.RemoveRange(context.ToDoItems);
-            context.SaveChanges();
-            context.Database.ExecuteSqlRaw("DELETE FROM sqlite_sequence WHERE name='ToDoItems'");
-        }
-        catch (Exception)
-        {
+        // Arrange
+        int existingId = 1;
+        var item = new ToDoItem { ToDoItemId = existingId, Name = "Vyluxuj", Description = "Vyluxuj celý byt", IsCompleted = false };
 
-        }
-        finally
-        {
-            context?.Dispose();
-        }
+        repositoryMock.GetById(existingId).Returns(item);
+
+        // Act
+        var actionResult = controller.ReadById(existingId);
+
+        // Assert
+        repositoryMock.Received(1).GetById(existingId);
+
+        var okResult = Assert.IsType<OkObjectResult>(actionResult);
+        var returnedDto = Assert.IsType<ToDoItemGetResponseDto>(okResult.Value);
+
+        // C. Ověříme, že vrácená data jsou správná
+        Assert.Equal(existingId, returnedDto.Id);
+        Assert.Equal(item.Name, returnedDto.Name);
+        Assert.Equal(item.Description, returnedDto.Description);
+        Assert.Equal(item.IsCompleted, returnedDto.IsCompleted);
+    }
+
+    [Fact]
+    public void Get_ById_NonExistentItem_ReturnsNotFound()
+    {
+        // Arrange
+        int nonExistentId = 999;
+
+        repositoryMock.GetById(nonExistentId).Returns((ToDoItem)null);
+
+        // Act
+        var actionResult = controller.ReadById(nonExistentId);
+
+        // Assert
+        repositoryMock.Received(1).GetById(nonExistentId);
+        Assert.IsType<NotFoundResult>(actionResult);
     }
 }
+

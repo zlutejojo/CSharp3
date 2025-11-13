@@ -3,24 +3,15 @@ namespace ToDoList.WebApi;
 using Microsoft.AspNetCore.Mvc;
 using ToDoList.Domain.Models;
 using ToDoList.Domain.DTOs;
-using ToDoList.Persistence;
-using Humanizer;
 using ToDoList.Persistence.Repositories;
+using ToDoList.Persistence;
 
 [Route("api/[controller]")] //localhost:5000/api/ToDoItems
 [ApiController]
 public class ToDoItemsController : ControllerBase
 {
 
-    private static readonly List<ToDoItem> items = [];
-    // private readonly ToDoItemsContext context;
     private readonly IRepository<ToDoItem> repository;
-
-    // public ToDoItemsController(ToDoItemsContext context, IRepository<ToDoItem> repository)
-    // {
-    //     this.context = context;
-    //     this.repository = repository;
-    // }
 
     public ToDoItemsController(IRepository<ToDoItem> repository)
     {
@@ -55,8 +46,8 @@ public class ToDoItemsController : ControllerBase
     {
         try
         {
-            var responseDtos = context.ToDoItems
-                //převede každý ToDoItem z DB na ToDoItemGetResponseDto
+            var itemsFromDb = repository.GetAll();
+            var responseDtos = itemsFromDb
                 .Select(item => ToDoItemGetResponseDto.FromDomain(item))
                 .ToList();
             return Ok(responseDtos); // 200
@@ -72,7 +63,7 @@ public class ToDoItemsController : ControllerBase
     {
         try
         {
-            ToDoItem item = context.ToDoItems.Find(toDoItemId);
+            ToDoItem item = repository.GetById(toDoItemId);
 
             if (item == null)
             {
@@ -94,7 +85,7 @@ public class ToDoItemsController : ControllerBase
     {
         try
         {
-            ToDoItem itemToUpdate = context.ToDoItems.Find(toDoItemId);
+            ToDoItem itemToUpdate = repository.GetById(toDoItemId);
 
             if (itemToUpdate == null)
             {
@@ -106,7 +97,7 @@ public class ToDoItemsController : ControllerBase
             itemToUpdate.Description = request.Description;
             itemToUpdate.IsCompleted = request.IsCompleted;
 
-            context.SaveChanges();
+            repository.Update(itemToUpdate);
 
             var responseDto = ToDoItemGetResponseDto.FromDomain(itemToUpdate);
             return Ok(responseDto); // 200
@@ -122,15 +113,14 @@ public class ToDoItemsController : ControllerBase
     {
         try
         {
-            ToDoItem itemToDelete = context.ToDoItems.Find(toDoItemId);
+            ToDoItem itemToDelete = repository.GetById(toDoItemId);
 
             if (itemToDelete == null)
             {
                 return NotFound(); // 404
             }
 
-            context.ToDoItems.Remove(itemToDelete);
-            context.SaveChanges();
+            repository.Delete(toDoItemId);
 
             return NoContent(); // 204
         }
@@ -138,15 +128,5 @@ public class ToDoItemsController : ControllerBase
         {
             return Problem(ex.Message, null, StatusCodes.Status500InternalServerError); // 500
         }
-    }
-
-    public void AddItemToStorage(ToDoItem item)
-    {
-        items.Add(item);
-    }
-
-    public void RemoveItemFromStorage(ToDoItem item)
-    {
-        items.Remove(item);
     }
 }

@@ -1,42 +1,41 @@
-using System;
+
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using NSubstitute;
 using ToDoList.Domain.DTOs;
 using ToDoList.Domain.Models;
-using ToDoList.Persistence;
 using ToDoList.Persistence.Repositories;
 using ToDoList.WebApi;
 
 
-namespace ToDoList.Test.IntegrationTests;
+namespace ToDoList.Test.UnitTests;
 
-public class PutTests : IDisposable
+public class PutTests
 {
-    private readonly ToDoItemsContext context;
+    private readonly IRepository<ToDoItem> repositoryMock;
     private readonly ToDoItemsController controller;
-    private readonly ToDoItemsRepository repository;
 
     public PutTests()
     {
-        context = new ToDoItemsContext("Data Source=../../../IntegrationTests/data/localdb_test.db");
-        repository = new ToDoItemsRepository(context);
-        controller = new ToDoItemsController(repository);
+        repositoryMock = Substitute.For<IRepository<ToDoItem>>();
+        controller = new ToDoItemsController(repositoryMock);
     }
 
     [Fact]
     public void Put_UpdateItem_ReturnsCreatedResponse()
     {
         // Arrange
-        var originalItem = new ToDoItem { Name = "Vyper", Description = "Vyper barevné prádlo" };
-        context.ToDoItems.Add(originalItem);
-        context.SaveChanges();
+        int existingId = 1;
+        var originalItem = new ToDoItem { ToDoItemId = existingId, Name = "Vyper", Description = "Vyper barevné prádlo", IsCompleted = false };
 
-        var request = new ToDoItemUpdateRequestDto("Vyper", "Vyper bílé prádlo", true);
+        repositoryMock.GetById(existingId).Returns(originalItem);
+
+        var request = new ToDoItemUpdateRequestDto("Vyper", "Vyper bílé prádlo", false);
 
         // Act
-        var actionResult = controller.UpdateById(originalItem.ToDoItemId, request);
+        var actionResult = controller.UpdateById(existingId, request);
 
         // Assert
+        repositoryMock.Received(1).Update(originalItem);
         var okResult = Assert.IsType<OkObjectResult>(actionResult);
         Assert.Equal(200, okResult.StatusCode);
 
@@ -56,6 +55,7 @@ public class PutTests : IDisposable
         var request = new ToDoItemUpdateRequestDto("Nic", "Nic", false);
         //předpokládám, že v seznamu není žádná položka s tímto ID
         int nonExistentId = 99999;
+        repositoryMock.GetById(nonExistentId).Returns((ToDoItem)null);
 
         // Act
         // Zavoláme metodu pro update s neexistujícím ID.
@@ -64,26 +64,6 @@ public class PutTests : IDisposable
         // Assert
         var notFoundResult = Assert.IsType<NotFoundResult>(actionResult);
         Assert.Equal(404, notFoundResult.StatusCode);
-    }
-
-    //mazání pomocí reflexe - vyčištění statického seznamu items v ToDoItemsController
-    public void Dispose()
-    {
-        try
-        {
-            context.ToDoItems.RemoveRange(context.ToDoItems);
-            context.SaveChanges();
-
-            // Resetujeme identity counter (auto-increment), aby další testy začínaly s ID 1
-            context.Database.ExecuteSqlRaw("DELETE FROM sqlite_sequence WHERE name='ToDoItems'");
-        }
-        catch (Exception)
-        {
-
-        }
-        finally
-        {
-            context?.Dispose();
-        }
+        repositoryMock.DidNotReceive().Update(Arg.Any<ToDoItem>());
     }
 }

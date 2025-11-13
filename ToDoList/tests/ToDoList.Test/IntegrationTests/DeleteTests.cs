@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ToDoList.Domain.Models;
 using ToDoList.Persistence;
+using ToDoList.Persistence.Repositories;
 using ToDoList.WebApi;
 
 
@@ -9,13 +10,15 @@ namespace ToDoList.Test.IntegrationTests;
 
 public class DeleteTests : IDisposable
 {
-    private readonly ToDoItemsContext _context;
-    private readonly ToDoItemsController _controller;
+    private readonly ToDoItemsContext context;
+    private readonly ToDoItemsController controller;
+    private readonly ToDoItemsRepository repository;
 
     public DeleteTests()
     {
-        _context = new ToDoItemsContext("Data Source=../../../IntegrationTests/data/localdb_test.db");
-        _controller = new ToDoItemsController(_context);
+        context = new ToDoItemsContext("Data Source=../../../IntegrationTests/data/localdb_test.db");
+        repository = new ToDoItemsRepository(context);
+        controller = new ToDoItemsController(repository);
     }
 
     [Fact]
@@ -23,17 +26,17 @@ public class DeleteTests : IDisposable
     {
         // Arrange
         var itemToDelete = new ToDoItem { Name = "Položka ke smazání", Description = "Tato položka bude smazána", IsCompleted = false };
-        _context.ToDoItems.Add(itemToDelete);
-        _context.SaveChanges();
+        context.ToDoItems.Add(itemToDelete);
+        context.SaveChanges();
 
         // Act
-        IActionResult actionResult = _controller.DeleteById(itemToDelete.ToDoItemId);
+        IActionResult actionResult = controller.DeleteById(itemToDelete.ToDoItemId);
 
         // Assert
         var noContentResult = Assert.IsType<NoContentResult>(actionResult);
         Assert.Equal(204, noContentResult.StatusCode);
 
-        var itemInDb = _context.ToDoItems.Find(itemToDelete.ToDoItemId);
+        var itemInDb = context.ToDoItems.Find(itemToDelete.ToDoItemId);
         Assert.Null(itemInDb);
     }
 
@@ -45,7 +48,7 @@ public class DeleteTests : IDisposable
         int nonExistentId = 99999;
 
         // Act
-        var actionResult = _controller.DeleteById(nonExistentId);
+        var actionResult = controller.DeleteById(nonExistentId);
 
         // Assert
         var notFoundResult = Assert.IsType<NotFoundResult>(actionResult);
@@ -57,11 +60,11 @@ public class DeleteTests : IDisposable
     {
         try
         {
-            _context.ToDoItems.RemoveRange(_context.ToDoItems);
-            _context.SaveChanges();
+            context.ToDoItems.RemoveRange(context.ToDoItems);
+            context.SaveChanges();
 
             // Resetujeme identity counter (auto-increment), aby další testy začínaly s ID 1
-            _context.Database.ExecuteSqlRaw("DELETE FROM sqlite_sequence WHERE name='ToDoItems'");
+            context.Database.ExecuteSqlRaw("DELETE FROM sqlite_sequence WHERE name='ToDoItems'");
         }
         catch (Exception)
         {
@@ -69,7 +72,7 @@ public class DeleteTests : IDisposable
         }
         finally
         {
-            _context?.Dispose();
+            context?.Dispose();
         }
     }
 }

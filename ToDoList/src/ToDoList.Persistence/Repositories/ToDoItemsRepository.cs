@@ -18,43 +18,32 @@ public class ToDoItemsRepository : IRepository<ToDoItem>
         context.SaveChanges();
     }
 
-public IEnumerable<ToDoItem> GetAll()
+    public IEnumerable<ToDoItem> GetAll()
     {
+        return context.ToDoItems.ToList();
+    }
 
-            var responseDtos = context.ToDoItems
-                //převede každý ToDoItem z DB na ToDoItemGetResponseDto
-                .Select(item => ToDoItemGetResponseDto.FromDomain(item))
-                .ToList();
-            return responseDtos;
-        }
+    public ToDoItem GetById(int id)
+    {
+        // Najde položku podle jejího primárního klíče
+        return context.ToDoItems.Find(id);
+    }
 
-        public ToDoItem GetById(int id)
+    public void Update(ToDoItem entity)
+    {
+        context.ToDoItems.Update(entity);
+        context.SaveChanges();
+    }
+
+    public void Delete(int id)
+    {
+        var itemToDelete = context.ToDoItems.Find(id);
+        if (itemToDelete != null)
         {
-            // Najde položku podle jejího primárního klíče
-            return _context.ToDoItems.Find(id);
+            context.ToDoItems.Remove(itemToDelete);
+            context.SaveChanges();
         }
-
-        public void Update(ToDoItem entity)
-        {
-            // EF Core automaticky sleduje změny na entitě,
-            // kterou jsme načetli, takže stačí jen uložit.
-            // Pro jistotu můžeme explicitně nastavit stav.
-            _context.ToDoItems.Update(entity);
-            _context.SaveChanges();
-        }
-
-        public void Delete(int id)
-        {
-            // Najdeme položku, kterou chceme smazat
-            var itemToDelete = _context.ToDoItems.Find(id);
-            if (itemToDelete != null)
-            {
-                // Pokud existuje, označíme ji ke smazání
-                _context.ToDoItems.Remove(itemToDelete);
-                // A provedeme smazání v databázi
-                _context.SaveChanges();
-            }
-        }
+    }
 
 
 }
