@@ -1,4 +1,5 @@
 
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using NSubstitute;
 using ToDoList.Domain.DTOs;
@@ -21,7 +22,7 @@ public class PutTests
     }
 
     [Fact]
-    public void Put_UpdateItem_ReturnsCreatedResponse()
+    public void Put_UpdateByIdWhenItemUpdated_ReturnsOkResponse()
     {
         // Arrange
         int existingId = 1;
@@ -41,7 +42,6 @@ public class PutTests
 
         var returnedDto = Assert.IsType<ToDoItemGetResponseDto>(okResult.Value);
 
-        // Nyní ověřte vlastnosti vráceného DTO
         Assert.Equal(request.Name, returnedDto.Name);
         Assert.Equal(request.Description, returnedDto.Description);
         Assert.Equal(request.IsCompleted, returnedDto.IsCompleted);
@@ -49,11 +49,10 @@ public class PutTests
     }
 
     [Fact]
-    public void Put_UpdateNonExistentItem_ReturnsNotFound()
+    public void Put_UpdateByIdWhenIdNotFound_ReturnsNotFound()
     {
         // Arrange
         var request = new ToDoItemUpdateRequestDto("Nic", "Nic", false);
-        //předpokládám, že v seznamu není žádná položka s tímto ID
         int nonExistentId = 99999;
         repositoryMock.GetById(nonExistentId).Returns((ToDoItem)null);
 
@@ -65,5 +64,29 @@ public class PutTests
         var notFoundResult = Assert.IsType<NotFoundResult>(actionResult);
         Assert.Equal(404, notFoundResult.StatusCode);
         repositoryMock.DidNotReceive().Update(Arg.Any<ToDoItem>());
+    }
+
+    [Fact]
+    public void Put_UpdateByIdUnhandledException_ReturnsInternalServerError()
+    {
+        // Arrange
+        var exceptionMessage = "Database connection failed";
+        int existingId = 1;
+        var itemToUpdate = new ToDoItem { ToDoItemId = existingId, Name = "Test Item", Description = "Test Description", IsCompleted = false };
+        // Nejprve musíme simulovat, že položka byla nalezena
+        repositoryMock.GetById(existingId).Returns(itemToUpdate);
+        // až potom nastavíme, že samotný update selže
+        repositoryMock.When(x => x.Update(Arg.Any<ToDoItem>()))
+                      .Do(call => { throw new Exception(exceptionMessage); });
+
+        // Act
+        var actionResult = controller.UpdateById(existingId, new ToDoItemUpdateRequestDto("Test", "Test", false));
+
+        // Assert
+        var objectResult = Assert.IsType<ObjectResult>(actionResult);
+        Assert.Equal(500, objectResult.StatusCode);
+
+        var problemDetails = Assert.IsType<ProblemDetails>(objectResult.Value);
+        Assert.Contains(exceptionMessage, problemDetails.Detail);
     }
 }

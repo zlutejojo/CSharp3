@@ -24,7 +24,7 @@ public class GetTests
     }
 
     [Fact]
-    public void Get_AllItems_ReturnsAllItems()
+    public void Get_ReadWhenSomeItemAvailable_ReturnsOk()
     {
         // Arrange
         todoItem1 = new ToDoItem
@@ -49,7 +49,6 @@ public class GetTests
         // Act
         var actionResult = controller.Read();
 
-
         // Assert
         repositoryMock.Received(1).GetAll();
 
@@ -73,7 +72,7 @@ public class GetTests
     }
 
     [Fact]
-    public void Get_ById_ExistingItem_ReturnsOkWithItem()
+    public void Get_ReadByIdWhenSomeItemAvailable_ReturnsOk()
     {
         // Arrange
         int existingId = 1;
@@ -98,7 +97,25 @@ public class GetTests
     }
 
     [Fact]
-    public void Get_ById_NonExistentItem_ReturnsNotFound()
+    public void Get_ReadWhenNoItemAvailable_ReturnsOkWithEmptyCollection()
+    {
+        // Arrange
+        // Nastavíme mock, aby vrátil prázdný seznam
+        repositoryMock.GetAll().Returns(new List<ToDoItem>());
+
+        // Act
+        var actionResult = controller.Read();
+
+        // Assert
+        repositoryMock.Received(1).GetAll();
+        var okResult = Assert.IsType<OkObjectResult>(actionResult.Result);
+        // Ověříme, že vrácená kolekce je prázdná
+        var returnedItems = Assert.IsAssignableFrom<IEnumerable<ToDoItemGetResponseDto>>(okResult.Value);
+        Assert.Empty(returnedItems);
+    }
+
+    [Fact]
+    public void Get_ReadByIdWhenItemIsNull_ReturnsNotFound()
     {
         // Arrange
         int nonExistentId = 999;
@@ -111,6 +128,48 @@ public class GetTests
         // Assert
         repositoryMock.Received(1).GetById(nonExistentId);
         Assert.IsType<NotFoundResult>(actionResult);
+    }
+
+    [Fact]
+    public void Get_ReadUnhandledException_ReturnsInternalServerError()
+    {
+        // Arrange
+        var exceptionMessage = "Database connection failed";
+
+        // Nastavíme mock, aby vyvolal výjimku při volání metody GetAll()
+        repositoryMock.When(x => x.GetAll())
+                      .Do(call => { throw new Exception(exceptionMessage); });
+
+        // Act
+        var actionResult = controller.Read();
+
+        // Assert
+        var objectResult = Assert.IsType<ObjectResult>(actionResult.Result);
+        Assert.Equal(500, objectResult.StatusCode);
+
+        var problemDetails = Assert.IsType<ProblemDetails>(objectResult.Value);
+        Assert.Contains(exceptionMessage, problemDetails.Detail);
+    }
+
+    [Fact]
+    public void Get_ReadByIdUnhandledException_ReturnsInternalServerError()
+    {
+        // Arrange
+        var exceptionMessage = "Database connection failed";
+
+        // Nastavíme mock, aby vyvolal výjimku při volání metody GetById()
+        repositoryMock.When(x => x.GetById(Arg.Any<int>()))
+                      .Do(call => { throw new Exception(exceptionMessage); });
+
+        // Act
+        var actionResult = controller.ReadById(1);
+
+        // Assert
+        var objectResult = Assert.IsType<ObjectResult>(actionResult);
+        Assert.Equal(500, objectResult.StatusCode);
+
+        var problemDetails = Assert.IsType<ProblemDetails>(objectResult.Value);
+        Assert.Contains(exceptionMessage, problemDetails.Detail);
     }
 }
 
