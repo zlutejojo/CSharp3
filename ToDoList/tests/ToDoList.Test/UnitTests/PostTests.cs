@@ -28,14 +28,6 @@ public class PostTests
             Description: "Udělej pečené kuře s rýží",
             IsCompleted: false
         );
-        //připravíme doménový objekt
-        ToDoItem itemInDb = new ToDoItem
-        {
-            ToDoItemId = 1,
-            Name = request.Name,
-            Description = request.Description,
-            IsCompleted = request.IsCompleted
-        };
 
         // Act
         IActionResult actionResult = controller.Create(request);
