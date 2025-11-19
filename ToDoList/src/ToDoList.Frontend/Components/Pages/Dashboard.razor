@@ -5,10 +5,10 @@
     <table>
         <thead>
             <tr>
-                <th>ID</th>
-                <th>Název</th>
-                <th>Popis</th>
-                <th>Dokončeno</th>
+                <th><button class="btn btn-link" @onclick="OrderById">ID</button></th>
+                <th><button class="btn btn-link" @onclick="OrderByName">Název</button></th>
+                <th><button class="btn btn-link" @onclick="OrderByDescription">Popis</button></th>
+                <th><button class="btn btn-link" @onclick="OrderByCompleted">Dokončeno</button></th>
             </tr>
         </thead>
         <tbody>
@@ -23,10 +23,6 @@
             }
         </tbody>
     </table>
-    <hr />
-    <button @onclick="OrderById">Order By ID</button>
-    <hr />
-    <button @onclick="OrderByName">Order By Name</button>
 </div>
 
 @code {
@@ -40,15 +36,20 @@ new ToDoItemView(5, "Přečíst knihu", "Kapitola 5", true)
 };
     private void OrderById()
     {
-        Console.WriteLine("Tlačítko 'Order By ID' bylo stisknuto.");
         testData = testData.OrderBy(item => item.Id).ToList();
-
     }
 
     private void OrderByName()
     {
-        Console.WriteLine("Tlačítko 'Order By Name' bylo stisknuto.");
         testData = testData.OrderBy(item => item.Name).ToList();
+    }
+    private void OrderByDescription()
+    {
+        testData = testData.OrderBy(item => item.Description).ToList();
+    }
 
+    private void OrderByCompleted()
+    {
+        testData = testData.OrderBy(item => item.IsCompleted).ToList();
     }
 }
