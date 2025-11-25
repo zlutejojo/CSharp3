@@ -1,36 +1,55 @@
 ﻿@using ToDoList.Frontend.Models
+@rendermode InteractiveServer
 <div>
-<h2>ToDo items dashboard</h2>
-<table>
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Název</th>
-            <th>Popis</th>
-            <th>Dokončeno</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in testData)
-        {
+    <h2>ToDo items dashboard</h2>
+    <table>
+        <thead>
             <tr>
-            <td>@item.Id</td>
-            <td>@item.Name</td>
-            <td>@item.Description</td>
-            <td>@(item.IsCompleted ? "Dokonceny" : "Nedokonceny")</td>
+                <th><button class="btn btn-link" @onclick="OrderById">ID</button></th>
+                <th><button class="btn btn-link" @onclick="OrderByName">Název</button></th>
+                <th><button class="btn btn-link" @onclick="OrderByDescription">Popis</button></th>
+                <th><button class="btn btn-link" @onclick="OrderByCompleted">Dokončeno</button></th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @foreach (var item in testData)
+            {
+                <tr>
+                    <td>@item.Id</td>
+                    <td>@item.Name</td>
+                    <td>@item.Description</td>
+                    <td>@(item.IsCompleted ? "Dokončený" : "Nedokončený")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
 </div>
 
 @code {
     private List<ToDoItemView> testData = new()
+{
+new ToDoItemView(1, "Nakoupit potraviny", "Mléko, chléb, vejce", false),
+new ToDoItemView(2, "Dokončit projekt", "Implementovat všechny funkce", true),
+new ToDoItemView(3, "Zavolat mamince", "Domluvit víkend", false),
+new ToDoItemView(4, "Cvičit", "Běhání v parku", false),
+new ToDoItemView(5, "Přečíst knihu", "Kapitola 5", true)
+};
+    private void OrderById()
     {
-        new ToDoItemView(1, "Nakoupit potraviny", "Mléko, chléb, vejce", false),
-        new ToDoItemView(2, "Dokončit projekt", "Implementovat všechny funkce", true),
-        new ToDoItemView(3, "Zavolat mamince", "Domluvit víkend", false),
-        new ToDoItemView(4, "Cvičit", "Běhání v parku", false),
-        new ToDoItemView(5, "Přečíst knihu", "Kapitola 5", true)
-    };
+        testData = testData.OrderBy(item => item.Id).ToList();
+    }
+
+    private void OrderByName()
+    {
+        testData = testData.OrderBy(item => item.Name).ToList();
+    }
+    private void OrderByDescription()
+    {
+        testData = testData.OrderBy(item => item.Description).ToList();
+    }
+
+    private void OrderByCompleted()
+    {
+        testData = testData.OrderBy(item => item.IsCompleted).ToList();
+    }
 }
