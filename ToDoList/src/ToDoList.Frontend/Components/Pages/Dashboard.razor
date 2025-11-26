@@ -1,5 +1,7 @@
-﻿@using ToDoList.Frontend.Models
+﻿@using ToDoList.Frontend.Clients
+@using ToDoList.Frontend.Models
 @rendermode InteractiveServer
+@inject IToDoItemsClient toDoItemsClient
 <div>
     <h2>ToDo items dashboard</h2>
     <table>
@@ -12,7 +14,7 @@
             </tr>
         </thead>
         <tbody>
-            @foreach (var item in testData)
+            @foreach (var item in sortedData)
             {
                 <tr>
                     <td>@item.Id</td>
@@ -26,7 +28,7 @@
 </div>
 
 @code {
-    private List<ToDoItemView> testData = new()
+    private List<ToDoItemView> sortedData = new()
 {
 new ToDoItemView(1, "Nakoupit potraviny", "Mléko, chléb, vejce", false),
 new ToDoItemView(2, "Dokončit projekt", "Implementovat všechny funkce", true),
@@ -36,20 +38,25 @@ new ToDoItemView(5, "Přečíst knihu", "Kapitola 5", true)
 };
     private void OrderById()
     {
-        testData = testData.OrderBy(item => item.Id).ToList();
+        sortedData = sortedData.OrderBy(item => item.Id).ToList();
     }
 
     private void OrderByName()
     {
-        testData = testData.OrderBy(item => item.Name).ToList();
+        sortedData = sortedData.OrderBy(item => item.Name).ToList();
     }
     private void OrderByDescription()
     {
-        testData = testData.OrderBy(item => item.Description).ToList();
+        sortedData = sortedData.OrderBy(item => item.Description).ToList();
     }
 
     private void OrderByCompleted()
     {
-        testData = testData.OrderBy(item => item.IsCompleted).ToList();
+        sortedData = sortedData.OrderBy(item => item.IsCompleted).ToList();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        sortedData = await toDoItemsClient.ReadItemsAsync();
     }
 }
