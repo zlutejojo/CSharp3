@@ -1,10 +1,11 @@
 using System;
+using Microsoft.EntityFrameworkCore;
 using ToDoList.Domain.DTOs;
 using ToDoList.Domain.Models;
 
 namespace ToDoList.Persistence.Repositories;
 
-public class ToDoItemsRepository : IRepository<ToDoItem>
+public class ToDoItemsRepository : IRepositoryAsync<ToDoItem>
 {
     private readonly ToDoItemsContext context;
 
@@ -12,36 +13,36 @@ public class ToDoItemsRepository : IRepository<ToDoItem>
     {
         this.context = context;
     }
-    public void Create(ToDoItem item)
+    public async Task CreateAsync(ToDoItem item)
     {
-        context.ToDoItems.Add(item);
-        context.SaveChanges();
+        await context.ToDoItems.AddAsync(item);
+        await context.SaveChangesAsync();
     }
 
-    public IEnumerable<ToDoItem> GetAll()
+    public async Task<IEnumerable<ToDoItem>> GetAllAsync()
     {
-        return context.ToDoItems.ToList();
+        return await context.ToDoItems.ToListAsync();
     }
 
-    public ToDoItem GetById(int id)
+    public async Task<ToDoItem?> GetByIdAsync(int id)
     {
         // Najde položku podle jejího primárního klíče
-        return context.ToDoItems.Find(id);
+        return await context.ToDoItems.FindAsync(id);
     }
 
-    public void Update(ToDoItem entity)
+    public async Task UpdateAsync(ToDoItem entity)
     {
         context.ToDoItems.Update(entity);
-        context.SaveChanges();
+        await context.SaveChangesAsync();
     }
 
-    public void Delete(int id)
+    public async Task DeleteAsync(int id)
     {
-        var itemToDelete = context.ToDoItems.Find(id);
+        var itemToDelete = await context.ToDoItems.FindAsync(id);
         if (itemToDelete != null)
         {
             context.ToDoItems.Remove(itemToDelete);
-            context.SaveChanges();
+            await context.SaveChangesAsync();
         }
     }
 
