@@ -9,7 +9,7 @@ GET {{host}}:{{port}}/api/ToDoItems
 ###
 
 //Get specific ToDoItem by id
-@itemToGetId = 1
+@itemToGetId = 5
 GET {{host}}:{{port}}/api/ToDoItems/{{itemToGetId}}
 
 ###
@@ -27,19 +27,19 @@ Content-Type: application/json
 ###
 
 //Update existing ToDoItem by id
-@itemToUpdateId = 3
+@itemToUpdateId = 5
 
 PUT {{host}}:{{port}}/api/ToDoItems/{{itemToUpdateId}}
 Content-Type: application/json
 
 {
-  "name": "Odpočívej",
-  "description": "Už nemusíš programovat",
+  "name": "odpočívej",
+  "description": "už nemusíš programovat",
   "isCompleted": false
 }
 
 ###
 
 //Delete exisiting ToDoItem by id
-@itemToDeleteId = 2
+@itemToDeleteId = 3
 DELETE {{host}}:{{port}}/api/ToDoItems/{{itemToDeleteId}}

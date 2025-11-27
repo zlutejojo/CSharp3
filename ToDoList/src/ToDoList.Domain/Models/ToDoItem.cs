@@ -11,5 +11,6 @@ namespace ToDoList.Domain.Models
         [StringLength(250)]
         public string Description { get; set; }
         public bool IsCompleted { get; set; }
+        public string? Category { get; set; }
     }
 }
