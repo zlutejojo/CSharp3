@@ -8,7 +8,7 @@ using ToDoList.WebApi;
 
 namespace ToDoList.Test.IntegrationTests;
 
-public class DeleteTests : IDisposable
+public class DeleteTests : IAsyncLifetime
 {
     private readonly ToDoItemsContext context;
     private readonly ToDoItemsController controller;
@@ -22,49 +22,50 @@ public class DeleteTests : IDisposable
     }
 
     [Fact]
-    public void Delete_DeletedItem_ReturnsOk()
+    public async Task Delete_DeletedItem_ReturnsOk()
     {
         // Arrange
         var itemToDelete = new ToDoItem { Name = "Položka ke smazání", Description = "Tato položka bude smazána", IsCompleted = false };
         context.ToDoItems.Add(itemToDelete);
-        context.SaveChanges();
+        await context.SaveChangesAsync();
 
         // Act
-        IActionResult actionResult = controller.DeleteById(itemToDelete.ToDoItemId);
+        IActionResult actionResult = await controller.DeleteById(itemToDelete.ToDoItemId);
 
         // Assert
         var noContentResult = Assert.IsType<NoContentResult>(actionResult);
         Assert.Equal(204, noContentResult.StatusCode);
 
-        var itemInDb = context.ToDoItems.Find(itemToDelete.ToDoItemId);
+        var itemInDb = await context.ToDoItems.FindAsync(itemToDelete.ToDoItemId);
         Assert.Null(itemInDb);
     }
 
     [Fact]
-    public void Delete_NonExistentItem_ReturnsNotFound()
+    public async Task Delete_NonExistentItem_ReturnsNotFound()
     {
         // Arrange
         // předpokládám, že v seznamu není žádná položka s tímto ID
         int nonExistentId = 99999;
 
         // Act
-        var actionResult = controller.DeleteById(nonExistentId);
+        var actionResult = await controller.DeleteById(nonExistentId);
 
         // Assert
         var notFoundResult = Assert.IsType<NotFoundResult>(actionResult);
         Assert.Equal(404, notFoundResult.StatusCode);
     }
 
-    //mazání pomocí reflexe - vyčištění statického seznamu items v ToDoItemsController
-    public void Dispose()
+    public Task InitializeAsync() => Task.CompletedTask;
+
+    public async Task DisposeAsync()
     {
         try
         {
             context.ToDoItems.RemoveRange(context.ToDoItems);
-            context.SaveChanges();
+            await context.SaveChangesAsync();
 
             // Resetujeme identity counter (auto-increment), aby další testy začínaly s ID 1
-            context.Database.ExecuteSqlRaw("DELETE FROM sqlite_sequence WHERE name='ToDoItems'");
+            await context.Database.ExecuteSqlRawAsync("DELETE FROM sqlite_sequence WHERE name='ToDoItems'");
         }
         catch (Exception)
         {
@@ -72,7 +73,7 @@ public class DeleteTests : IDisposable
         }
         finally
         {
-            context?.Dispose();
+            await context.DisposeAsync();
         }
     }
 }

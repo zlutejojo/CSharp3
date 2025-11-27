@@ -10,17 +10,17 @@ namespace ToDoList.Test.UnitTests;
 
 public class PostTests
 {
-    private readonly IRepository<ToDoItem> repositoryMock;
+    private readonly IRepositoryAsync<ToDoItem> repositoryMock;
     private readonly ToDoItemsController controller;
 
     public PostTests()
     {
-        repositoryMock = Substitute.For<IRepository<ToDoItem>>();
+        repositoryMock = Substitute.For<IRepositoryAsync<ToDoItem>>();
         controller = new ToDoItemsController(repositoryMock);
     }
 
     [Fact]
-    public void Post_CreateValidRequest_ReturnsCreatedAtAction()
+    public async Task Post_CreateValidRequest_ReturnsCreatedAtAction()
     {
         // Arrange
         ToDoItemCreateRequestDto request = new ToDoItemCreateRequestDto(
@@ -30,11 +30,12 @@ public class PostTests
         );
 
         // Act
-        IActionResult actionResult = controller.Create(request);
+        var result = await controller.Create(request);
+        IActionResult actionResult = result.Result;
 
         // Assert
         // ověření, že metoda Create byla zavolána jednou s libovolnou položkou ToDoItem
-        repositoryMock.Received(1).Create(Arg.Any<ToDoItem>());
+        await repositoryMock.Received(1).CreateAsync(Arg.Any<ToDoItem>());
         var createdResult = Assert.IsType<CreatedAtActionResult>(actionResult);
 
         var returnedDto = Assert.IsType<ToDoItemGetResponseDto>(createdResult.Value);
@@ -46,19 +47,20 @@ public class PostTests
     }
 
     [Fact]
-    public void Post_CreateUnhandledException_ReturnsInternalServerError()
+    public async Task Post_CreateUnhandledException_ReturnsInternalServerError()
     {
         // Arrange
         var exceptionMessage = "Database connection failed";
 
-        repositoryMock.When(x => x.Create(Arg.Any<ToDoItem>()))
+        repositoryMock.When(x => x.CreateAsync(Arg.Any<ToDoItem>()))
                       .Do(call => { throw new Exception(exceptionMessage); });
 
         var controller = new ToDoItemsController(repositoryMock);
         var request = new ToDoItemCreateRequestDto("Ukol", "Popis ukolu", false);
 
         // Act
-        var actionResult = controller.Create(request);
+        var result = await controller.Create(request);
+        var actionResult = result.Result;
 
         // Assert
         var objectResult = Assert.IsType<ObjectResult>(actionResult);

@@ -8,7 +8,7 @@ using ToDoList.Persistence;
 using ToDoList.Persistence.Repositories;
 using ToDoList.WebApi;
 
-public class GetTests : IDisposable
+public class GetTests : IAsyncLifetime
 {
     private readonly ToDoItemsContext context;
     private readonly ToDoItemsController controller;
@@ -25,7 +25,7 @@ public class GetTests : IDisposable
     }
 
     [Fact]
-    public void Get_AllItems_ReturnsAllItems()
+    public async Task Get_AllItems_ReturnsAllItems()
     {
         // Arrange
         todoItem1 = new ToDoItem
@@ -45,10 +45,10 @@ public class GetTests : IDisposable
         };
         context.ToDoItems.Add(todoItem1);
         context.ToDoItems.Add(todoItem2);
-        context.SaveChanges();
+        await context.SaveChangesAsync();
 
         // Act
-        var actionResult = controller.Read();
+        var actionResult = await controller.Read();
 
 
         // Assert
@@ -72,13 +72,15 @@ public class GetTests : IDisposable
         Assert.Equal(todoItem2.IsCompleted, secondItem.IsCompleted);
     }
 
-    public void Dispose()
+    public Task InitializeAsync() => Task.CompletedTask;
+
+    public async Task DisposeAsync()
     {
         try
         {
             context.ToDoItems.RemoveRange(context.ToDoItems);
-            context.SaveChanges();
-            context.Database.ExecuteSqlRaw("DELETE FROM sqlite_sequence WHERE name='ToDoItems'");
+            await context.SaveChangesAsync();
+            await context.Database.ExecuteSqlRawAsync("DELETE FROM sqlite_sequence WHERE name='ToDoItems'");
         }
         catch (Exception)
         {
@@ -86,7 +88,7 @@ public class GetTests : IDisposable
         }
         finally
         {
-            context?.Dispose();
+            await context.DisposeAsync();
         }
     }
 }
