@@ -33,14 +33,16 @@ public class GetTests
             ToDoItemId = 1,
             Name = "Udělej nákup",
             Description = "Kup rohlíky, maso, šunku",
-            IsCompleted = false
+            IsCompleted = false,
+            Category = "pochůzky"
         };
         todoItem2 = new ToDoItem
         {
             ToDoItemId = 2,
             Name = "Umyj nádobí",
             Description = "Umyj talíře a příbory",
-            IsCompleted = true
+            IsCompleted = true,
+            Category = "domácí práce"
         };
 
         var items = new List<ToDoItem> { todoItem1, todoItem2 };
@@ -64,11 +66,13 @@ public class GetTests
         Assert.Equal(todoItem1.Name, firstItem.Name);
         Assert.Equal(todoItem1.Description, firstItem.Description);
         Assert.Equal(todoItem1.IsCompleted, firstItem.IsCompleted);
+        Assert.Equal(todoItem1.Category, firstItem.Category);
 
         var secondItem = itemsList.Last();
         Assert.Equal(todoItem2.Name, secondItem.Name);
         Assert.Equal(todoItem2.Description, secondItem.Description);
         Assert.Equal(todoItem2.IsCompleted, secondItem.IsCompleted);
+        Assert.Equal(todoItem2.Category, secondItem.Category);
     }
 
     [Fact]
@@ -94,6 +98,7 @@ public class GetTests
         Assert.Equal(item.Name, returnedDto.Name);
         Assert.Equal(item.Description, returnedDto.Description);
         Assert.Equal(item.IsCompleted, returnedDto.IsCompleted);
+        Assert.Equal(item.Category, returnedDto.Category);
     }
 
     [Fact]

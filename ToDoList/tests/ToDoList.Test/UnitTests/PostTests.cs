@@ -26,7 +26,8 @@ public class PostTests
         ToDoItemCreateRequestDto request = new ToDoItemCreateRequestDto(
             Name: "Uvař oběd",
             Description: "Udělej pečené kuře s rýží",
-            IsCompleted: false
+            IsCompleted: false,
+            Category: "Domácí práce"
         );
 
         // Act
@@ -44,6 +45,7 @@ public class PostTests
         Assert.Equal(request.Name, returnedDto.Name);
         Assert.Equal(request.Description, returnedDto.Description);
         Assert.Equal(request.IsCompleted, returnedDto.IsCompleted);
+        Assert.Equal(request.Category, returnedDto.Category);
     }
 
     [Fact]
@@ -56,7 +58,7 @@ public class PostTests
                       .Do(call => { throw new Exception(exceptionMessage); });
 
         var controller = new ToDoItemsController(repositoryMock);
-        var request = new ToDoItemCreateRequestDto("Ukol", "Popis ukolu", false);
+        var request = new ToDoItemCreateRequestDto("Ukol", "Popis ukolu", false, "Kategorie");
 
         // Act
         var result = await controller.Create(request);

@@ -21,7 +21,8 @@ Content-Type: application/json
 {
   "name": "programuj",
   "description": "vypracuj úkol do C#",
-  "isCompleted": false
+  "isCompleted": false,
+  "category": "učení"
 }
 
 ###
@@ -35,7 +36,8 @@ Content-Type: application/json
 {
   "name": "odpočívej",
   "description": "už nemusíš programovat",
-  "isCompleted": false
+  "isCompleted": false,
+  "category": "relax"
 }
 
 ###

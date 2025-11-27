@@ -26,7 +26,7 @@ public class PostTests : IAsyncLifetime
     public async Task Post_CreateItem_ReturnsCreatedResponse()
     {
         // Arrange
-        var request = new ToDoItemCreateRequestDto("Utři prach", "utři prach z poliček", false);
+        var request = new ToDoItemCreateRequestDto("Utři prach", "utři prach z poliček", false, "Domácí práce");
 
         // Act
         var result = await controller.Create(request);
@@ -47,6 +47,7 @@ public class PostTests : IAsyncLifetime
         Assert.Equal(request.IsCompleted, returnedList.First().IsCompleted);
         // Ověření, že bylo vygenerováno nějaké ID
         Assert.True(returnedList.First().Id > 0);
+        Assert.Equal(request.Category, returnedList.First().Category);
     }
     public Task InitializeAsync() => Task.CompletedTask;
 
