@@ -31,7 +31,7 @@ public class PutTests : IAsyncLifetime
         context.ToDoItems.Add(originalItem);
         await context.SaveChangesAsync();
 
-        var request = new ToDoItemUpdateRequestDto("Vyper", "Vyper bílé prádlo", true);
+        var request = new ToDoItemUpdateRequestDto("Vyper", "Vyper bílé prádlo", true, "Domácí práce");
 
         // Act
         var actionResult = await controller.UpdateById(originalItem.ToDoItemId, request);
@@ -46,6 +46,7 @@ public class PutTests : IAsyncLifetime
         Assert.Equal(request.Name, returnedDto.Name);
         Assert.Equal(request.Description, returnedDto.Description);
         Assert.Equal(request.IsCompleted, returnedDto.IsCompleted);
+        Assert.Equal(request.Category, returnedDto.Category);
 
     }
 
@@ -53,7 +54,7 @@ public class PutTests : IAsyncLifetime
     public async Task Put_UpdateNonExistentItem_ReturnsNotFound()
     {
         // Arrange
-        var request = new ToDoItemUpdateRequestDto("Nic", "Nic", false);
+        var request = new ToDoItemUpdateRequestDto("Nic", "Nic", false, "Nic");
         //předpokládám, že v seznamu není žádná položka s tímto ID
         int nonExistentId = 99999;
 

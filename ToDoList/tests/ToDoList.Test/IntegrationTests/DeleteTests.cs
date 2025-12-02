@@ -25,7 +25,7 @@ public class DeleteTests : IAsyncLifetime
     public async Task Delete_DeletedItem_ReturnsOk()
     {
         // Arrange
-        var itemToDelete = new ToDoItem { Name = "Položka ke smazání", Description = "Tato položka bude smazána", IsCompleted = false };
+        var itemToDelete = new ToDoItem { Name = "Položka ke smazání", Description = "Tato položka bude smazána", IsCompleted = false, Category = "Tato položka bude smazána" };
         context.ToDoItems.Add(itemToDelete);
         await context.SaveChangesAsync();
 

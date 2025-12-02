@@ -34,14 +34,16 @@ public class GetTests : IAsyncLifetime
             ToDoItemId = 1,
             Name = "Udělej nákup",
             Description = "Kup rohlíky, maso, šunku",
-            IsCompleted = false
+            IsCompleted = false,
+            Category = "Pochůzky"
         };
         todoItem2 = new ToDoItem
         {
             ToDoItemId = 2,
             Name = "Umyj nádobí",
             Description = "Umyj talíře a příbory",
-            IsCompleted = true
+            IsCompleted = true,
+            Category = "Domácí práce"
         };
         context.ToDoItems.Add(todoItem1);
         context.ToDoItems.Add(todoItem2);
@@ -65,11 +67,13 @@ public class GetTests : IAsyncLifetime
         Assert.Equal(todoItem1.Name, firstItem.Name);
         Assert.Equal(todoItem1.Description, firstItem.Description);
         Assert.Equal(todoItem1.IsCompleted, firstItem.IsCompleted);
+        Assert.Equal(todoItem1.Category, firstItem.Category);
 
         var secondItem = itemsList.Last();
         Assert.Equal(todoItem2.Name, secondItem.Name);
         Assert.Equal(todoItem2.Description, secondItem.Description);
         Assert.Equal(todoItem2.IsCompleted, secondItem.IsCompleted);
+        Assert.Equal(todoItem2.Category, secondItem.Category);
     }
 
     public Task InitializeAsync() => Task.CompletedTask;

@@ -1,6 +1,7 @@
 ﻿namespace ToDoList.Persistence;
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using ToDoList.Domain.Models;
 // řeší interakci s databází pomocí Entity Framework Core
 public class ToDoItemsContext : DbContext
@@ -20,5 +21,8 @@ public class ToDoItemsContext : DbContext
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         optionsBuilder.UseSqlite(connectionString);
+
+        optionsBuilder.ConfigureWarnings(warnings =>
+            warnings.Ignore(RelationalEventId.PendingModelChangesWarning));
     }
 }

@@ -30,7 +30,7 @@ public class PutTests
 
         repositoryMock.GetByIdAsync(existingId).Returns(originalItem);
 
-        var request = new ToDoItemUpdateRequestDto("Vyper", "Vyper bílé prádlo", false);
+        var request = new ToDoItemUpdateRequestDto("Vyper", "Vyper bílé prádlo", false, "domácí práce");
 
         // Act
         var actionResult = await controller.UpdateById(existingId, request);
@@ -45,6 +45,7 @@ public class PutTests
         Assert.Equal(request.Name, returnedDto.Name);
         Assert.Equal(request.Description, returnedDto.Description);
         Assert.Equal(request.IsCompleted, returnedDto.IsCompleted);
+        Assert.Equal(request.Category, returnedDto.Category);
 
     }
 
@@ -52,7 +53,7 @@ public class PutTests
     public async Task Put_UpdateByIdWhenIdNotFound_ReturnsNotFound()
     {
         // Arrange
-        var request = new ToDoItemUpdateRequestDto("Nic", "Nic", false);
+        var request = new ToDoItemUpdateRequestDto("Nic", "Nic", false, "Nic");
         int nonExistentId = 99999;
         repositoryMock.GetByIdAsync(nonExistentId).Returns(Task.FromResult<ToDoItem?>(null));
 
@@ -79,7 +80,7 @@ public class PutTests
                       .Do(call => { throw new Exception(exceptionMessage); });
 
         // Act
-        var actionResult = await controller.UpdateById(existingId, new ToDoItemUpdateRequestDto("Test", "Test", false));
+        var actionResult = await controller.UpdateById(existingId, new ToDoItemUpdateRequestDto("Test", "Test", false, "Test"));
         // Assert
         var objectResult = Assert.IsType<ObjectResult>(actionResult);
         Assert.Equal(500, objectResult.StatusCode);
