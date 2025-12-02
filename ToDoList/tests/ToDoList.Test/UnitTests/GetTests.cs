@@ -11,7 +11,7 @@ using ToDoList.WebApi;
 
 public class GetTests
 {
-    private readonly IRepository<ToDoItem> repositoryMock;
+    private readonly IRepositoryAsync<ToDoItem> repositoryMock;
     private readonly ToDoItemsController controller;
 
     public ToDoItem todoItem1;
@@ -19,12 +19,12 @@ public class GetTests
 
     public GetTests()
     {
-        repositoryMock = Substitute.For<IRepository<ToDoItem>>();
+        repositoryMock = Substitute.For<IRepositoryAsync<ToDoItem>>();
         controller = new ToDoItemsController(repositoryMock);
     }
 
     [Fact]
-    public void Get_ReadWhenSomeItemAvailable_ReturnsOk()
+    public async Task Get_ReadWhenSomeItemAvailable_ReturnsOk()
     {
         // Arrange
         todoItem1 = new ToDoItem
@@ -44,13 +44,13 @@ public class GetTests
         };
 
         var items = new List<ToDoItem> { todoItem1, todoItem2 };
-        repositoryMock.GetAll().Returns(items);
+        repositoryMock.GetAllAsync().Returns(items);
 
         // Act
-        var actionResult = controller.Read();
+        var actionResult = await controller.Read();
 
         // Assert
-        repositoryMock.Received(1).GetAll();
+        await repositoryMock.Received(1).GetAllAsync();
 
         // ověření, že akce vrátila správný typ odpovědi OK 200, zároveň přetypuje na OkObjectResult
         var okResult = Assert.IsType<OkObjectResult>(actionResult.Result);
@@ -72,21 +72,21 @@ public class GetTests
     }
 
     [Fact]
-    public void Get_ReadByIdWhenSomeItemAvailable_ReturnsOk()
+    public async Task Get_ReadByIdWhenSomeItemAvailable_ReturnsOk()
     {
         // Arrange
         int existingId = 1;
         var item = new ToDoItem { ToDoItemId = existingId, Name = "Vyluxuj", Description = "Vyluxuj celý byt", IsCompleted = false };
 
-        repositoryMock.GetById(existingId).Returns(item);
+        repositoryMock.GetByIdAsync(existingId).Returns(item);
 
         // Act
-        var actionResult = controller.ReadById(existingId);
+        var actionResult = await controller.ReadById(existingId);
 
         // Assert
-        repositoryMock.Received(1).GetById(existingId);
+        await repositoryMock.Received(1).GetByIdAsync(existingId);
 
-        var okResult = Assert.IsType<OkObjectResult>(actionResult);
+        var okResult = Assert.IsType<OkObjectResult>(actionResult.Result);
         var returnedDto = Assert.IsType<ToDoItemGetResponseDto>(okResult.Value);
 
         // C. Ověříme, že vrácená data jsou správná
@@ -97,17 +97,16 @@ public class GetTests
     }
 
     [Fact]
-    public void Get_ReadWhenNoItemAvailable_ReturnsOkWithEmptyCollection()
+    public async Task Get_ReadWhenNoItemAvailable_ReturnsOkWithEmptyCollection()
     {
         // Arrange
         // Nastavíme mock, aby vrátil prázdný seznam
-        repositoryMock.GetAll().Returns(new List<ToDoItem>());
-
+        repositoryMock.GetAllAsync().Returns(new List<ToDoItem>());
         // Act
-        var actionResult = controller.Read();
+        var actionResult = await controller.Read();
 
         // Assert
-        repositoryMock.Received(1).GetAll();
+        await repositoryMock.Received(1).GetAllAsync();
         var okResult = Assert.IsType<OkObjectResult>(actionResult.Result);
         // Ověříme, že vrácená kolekce je prázdná
         var returnedItems = Assert.IsAssignableFrom<IEnumerable<ToDoItemGetResponseDto>>(okResult.Value);
@@ -115,34 +114,34 @@ public class GetTests
     }
 
     [Fact]
-    public void Get_ReadByIdWhenItemIsNull_ReturnsNotFound()
+    public async Task Get_ReadByIdWhenItemIsNull_ReturnsNotFound()
     {
         // Arrange
         int nonExistentId = 999;
 
-        repositoryMock.GetById(nonExistentId).Returns((ToDoItem)null);
+        repositoryMock.GetByIdAsync(nonExistentId).Returns((ToDoItem)null);
 
         // Act
-        var actionResult = controller.ReadById(nonExistentId);
+        var result = await controller.ReadById(nonExistentId);
+        var actionResult = result.Result;
 
         // Assert
-        repositoryMock.Received(1).GetById(nonExistentId);
+        await repositoryMock.Received(1).GetByIdAsync(nonExistentId);
         Assert.IsType<NotFoundResult>(actionResult);
     }
 
     [Fact]
-    public void Get_ReadUnhandledException_ReturnsInternalServerError()
+    public async Task Get_ReadUnhandledException_ReturnsInternalServerError()
     {
         // Arrange
         var exceptionMessage = "Database connection failed";
 
         // Nastavíme mock, aby vyvolal výjimku při volání metody GetAll()
-        repositoryMock.When(x => x.GetAll())
+        repositoryMock.When(x => x.GetAllAsync())
                       .Do(call => { throw new Exception(exceptionMessage); });
 
         // Act
-        var actionResult = controller.Read();
-
+        var actionResult = await controller.Read();
         // Assert
         var objectResult = Assert.IsType<ObjectResult>(actionResult.Result);
         Assert.Equal(500, objectResult.StatusCode);
@@ -152,17 +151,18 @@ public class GetTests
     }
 
     [Fact]
-    public void Get_ReadByIdUnhandledException_ReturnsInternalServerError()
+    public async Task Get_ReadByIdUnhandledException_ReturnsInternalServerError()
     {
         // Arrange
         var exceptionMessage = "Database connection failed";
 
         // Nastavíme mock, aby vyvolal výjimku při volání metody GetById()
-        repositoryMock.When(x => x.GetById(Arg.Any<int>()))
+        repositoryMock.When(x => x.GetByIdAsync(Arg.Any<int>()))
                       .Do(call => { throw new Exception(exceptionMessage); });
 
         // Act
-        var actionResult = controller.ReadById(1);
+        var result = await controller.ReadById(1);
+        var actionResult = result.Result;
 
         // Assert
         var objectResult = Assert.IsType<ObjectResult>(actionResult);

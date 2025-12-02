@@ -9,7 +9,7 @@ using ToDoList.WebApi;
 
 namespace ToDoList.Test.IntegrationTests;
 
-public class PostTests : IDisposable
+public class PostTests : IAsyncLifetime
 {
     private readonly ToDoItemsContext context;
     private readonly ToDoItemsController controller;
@@ -23,14 +23,15 @@ public class PostTests : IDisposable
     }
 
     [Fact]
-    public void Post_CreateItem_ReturnsCreatedResponse()
+    public async Task Post_CreateItem_ReturnsCreatedResponse()
     {
         // Arrange
         var request = new ToDoItemCreateRequestDto("Utři prach", "utři prach z poliček", false);
 
         // Act
-        var actionResult = controller.Create(request);
-        var getResult = controller.Read();
+        var result = await controller.Create(request);
+        var actionResult = result.Result;
+        var getResult = await controller.Read();
 
         // Assert
         var createdResult = Assert.IsType<CreatedAtActionResult>(actionResult);
@@ -47,22 +48,23 @@ public class PostTests : IDisposable
         // Ověření, že bylo vygenerováno nějaké ID
         Assert.True(returnedList.First().Id > 0);
     }
-    //mazání pomocí reflexe - vyčištění statického seznamu items v ToDoItemsController
-    public void Dispose()
+    public Task InitializeAsync() => Task.CompletedTask;
+
+    public async Task DisposeAsync()
     {
         try
         {
             context.ToDoItems.RemoveRange(context.ToDoItems);
-            context.SaveChanges();
+            await context.SaveChangesAsync();
             //Reset ID počítače pro další testy
-            context.Database.ExecuteSqlRaw("DELETE FROM sqlite_sequence WHERE name='ToDoItems'");
+            await context.Database.ExecuteSqlRawAsync("DELETE FROM sqlite_sequence WHERE name='ToDoItems'");
         }
         catch (Exception)
         {
         }
         finally
         {
-            context?.Dispose();
+            await context.DisposeAsync();
         }
     }
 }

@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NSubstitute;
@@ -11,62 +12,62 @@ namespace ToDoList.Test.UnitTests;
 
 public class DeleteTests
 {
-    private readonly IRepository<ToDoItem> repositoryMock;
+    private readonly IRepositoryAsync<ToDoItem> repositoryMock;
     private readonly ToDoItemsController controller;
 
     public DeleteTests()
     {
-        repositoryMock = Substitute.For<IRepository<ToDoItem>>();
+        repositoryMock = Substitute.For<IRepositoryAsync<ToDoItem>>();
         controller = new ToDoItemsController(repositoryMock);
     }
 
     [Fact]
-    public void Delete_DeleteByIdValidItemId_ReturnsNoContent()
+    public async Task Delete_DeleteByIdValidItemId_ReturnsNoContent()
     {
         // Arrange
         int existingId = 1;
         var itemToDelete = new ToDoItem { ToDoItemId = existingId, Name = "Položka ke smazání", Description = "Tato položka bude smazána", IsCompleted = false };
-        repositoryMock.GetById(existingId).Returns(itemToDelete);
+        repositoryMock.GetByIdAsync(existingId).Returns(itemToDelete);
         // Act
-        IActionResult actionResult = controller.DeleteById(itemToDelete.ToDoItemId);
+        IActionResult actionResult = await controller.DeleteById(itemToDelete.ToDoItemId);
 
         // Assert
-        repositoryMock.Received(1).Delete(existingId);
+        await repositoryMock.Received(1).DeleteAsync(existingId);
 
         var noContentResult = Assert.IsType<NoContentResult>(actionResult);
         Assert.Equal(204, noContentResult.StatusCode);
     }
 
     [Fact]
-    public void Delete_DeleteByIdInvalidItemId_ReturnsNotFound()
+    public async Task Delete_DeleteByIdInvalidItemId_ReturnsNotFound()
     {
         // Arrange
         // předpokládám, že v seznamu není žádná položka s tímto ID
         int nonExistentId = 99999;
-        repositoryMock.GetById(nonExistentId).Returns((ToDoItem)null);
+        repositoryMock.GetByIdAsync(nonExistentId).Returns(Task.FromResult<ToDoItem?>(null));
 
         // Act
-        var actionResult = controller.DeleteById(nonExistentId);
+        var actionResult = await controller.DeleteById(nonExistentId);
 
         // Assert
-        repositoryMock.Received(1).GetById(nonExistentId);
+        await repositoryMock.Received(1).GetByIdAsync(nonExistentId);
         var notFoundResult = Assert.IsType<NotFoundResult>(actionResult);
         Assert.Equal(404, notFoundResult.StatusCode);
     }
 
     [Fact]
-    public void Delete_DeleteByIdUnhandledException_ReturnsInternalServerError()
+    public async Task Delete_DeleteByIdUnhandledException_ReturnsInternalServerError()
     {
         // Arrange
         var exceptionMessage = "Database connection failed";
         int existingId = 1;
         var itemToUpdate = new ToDoItem { ToDoItemId = existingId, Name = "Test Item", Description = "Test Description", IsCompleted = false };
-        repositoryMock.GetById(existingId).Returns(itemToUpdate);
-        repositoryMock.When(x => x.Delete(existingId))
+        repositoryMock.GetByIdAsync(existingId).Returns(itemToUpdate);
+        repositoryMock.When(x => x.DeleteAsync(existingId))
                       .Do(call => { throw new Exception(exceptionMessage); });
 
         // Act
-        var actionResult = controller.DeleteById(existingId);
+        var actionResult = await controller.DeleteById(existingId);
 
         // Assert
         var objectResult = Assert.IsType<ObjectResult>(actionResult);

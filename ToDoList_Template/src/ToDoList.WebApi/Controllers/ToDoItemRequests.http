@@ -19,21 +19,15 @@ POST {{host}}:{{port}}/api/ToDoItems
 Content-Type: application/json
 
 {
-<<<<<<< HEAD:ToDoList_Template/src/ToDoList.WebApi/Controllers/ToDoItemRequests.http
   "name": "programuj",
   "description": "vypracuj úkol do C#",
   "isCompleted": false
-=======
-  "name": "Example New Task",
-  "description": "Example New Description",
-  "isCompleted": true
->>>>>>> 06_lesson:ToDoList_Template/src/ToDoList.WebApi/ToDoItemRequests.http
 }
 
 ###
 
 //Update existing ToDoItem by id
-@itemToUpdateId = 2
+@itemToUpdateId = 3
 
 PUT {{host}}:{{port}}/api/ToDoItems/{{itemToUpdateId}}
 Content-Type: application/json
@@ -47,5 +41,5 @@ Content-Type: application/json
 ###
 
 //Delete exisiting ToDoItem by id
-@itemToDeleteId = 1
+@itemToDeleteId = 2
 DELETE {{host}}:{{port}}/api/ToDoItems/{{itemToDeleteId}}

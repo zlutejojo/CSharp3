@@ -10,7 +10,7 @@ using ToDoList.WebApi;
 
 namespace ToDoList.Test.IntegrationTests;
 
-public class PutTests : IDisposable
+public class PutTests : IAsyncLifetime
 {
     private readonly ToDoItemsContext context;
     private readonly ToDoItemsController controller;
@@ -24,17 +24,17 @@ public class PutTests : IDisposable
     }
 
     [Fact]
-    public void Put_UpdateItem_ReturnsCreatedResponse()
+    public async Task Put_UpdateItem_ReturnsCreatedResponse()
     {
         // Arrange
         var originalItem = new ToDoItem { Name = "Vyper", Description = "Vyper barevné prádlo" };
         context.ToDoItems.Add(originalItem);
-        context.SaveChanges();
+        await context.SaveChangesAsync();
 
         var request = new ToDoItemUpdateRequestDto("Vyper", "Vyper bílé prádlo", true);
 
         // Act
-        var actionResult = controller.UpdateById(originalItem.ToDoItemId, request);
+        var actionResult = await controller.UpdateById(originalItem.ToDoItemId, request);
 
         // Assert
         var okResult = Assert.IsType<OkObjectResult>(actionResult);
@@ -50,7 +50,7 @@ public class PutTests : IDisposable
     }
 
     [Fact]
-    public void Put_UpdateNonExistentItem_ReturnsNotFound()
+    public async Task Put_UpdateNonExistentItem_ReturnsNotFound()
     {
         // Arrange
         var request = new ToDoItemUpdateRequestDto("Nic", "Nic", false);
@@ -59,31 +59,20 @@ public class PutTests : IDisposable
 
         // Act
         // Zavoláme metodu pro update s neexistujícím ID.
-        IActionResult actionResult = controller.UpdateById(nonExistentId, request);
+        var actionResult = await controller.UpdateById(nonExistentId, request);
 
         // Assert
         var notFoundResult = Assert.IsType<NotFoundResult>(actionResult);
         Assert.Equal(404, notFoundResult.StatusCode);
     }
 
-    //mazání pomocí reflexe - vyčištění statického seznamu items v ToDoItemsController
-    public void Dispose()
+    public Task InitializeAsync() => Task.CompletedTask;
+
+    public async Task DisposeAsync()
     {
-        try
-        {
-            context.ToDoItems.RemoveRange(context.ToDoItems);
-            context.SaveChanges();
-
-            // Resetujeme identity counter (auto-increment), aby další testy začínaly s ID 1
-            context.Database.ExecuteSqlRaw("DELETE FROM sqlite_sequence WHERE name='ToDoItems'");
-        }
-        catch (Exception)
-        {
-
-        }
-        finally
-        {
-            context?.Dispose();
-        }
+        context.ToDoItems.RemoveRange(context.ToDoItems);
+        await context.SaveChangesAsync();
+        await context.Database.ExecuteSqlRawAsync("DELETE FROM sqlite_sequence WHERE name='ToDoItems'");
+        await context.DisposeAsync();
     }
 }
