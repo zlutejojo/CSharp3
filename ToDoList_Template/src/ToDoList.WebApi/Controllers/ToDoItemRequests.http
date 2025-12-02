@@ -19,10 +19,23 @@ POST {{host}}:{{port}}/api/ToDoItems
 Content-Type: application/json
 
 {
-  "name": "programuj",
-  "description": "vypracuj úkol do C#",
-  "isCompleted": false,
-  "category": "učení"
+  "name": "Example New Task",
+  "description": "Example New Description",
+  "isCompleted": true,
+  "category": "Work"
+}
+
+###
+
+//Add new ToDoItem without Category
+POST {{host}}:{{port}}/api/ToDoItems
+Content-Type: application/json
+
+{
+  "name": "Example New Task",
+  "description": "Example New Description",
+  "isCompleted": true,
+  "category": null
 }
 
 ###
@@ -34,10 +47,23 @@ PUT {{host}}:{{port}}/api/ToDoItems/{{itemToUpdateId}}
 Content-Type: application/json
 
 {
-  "name": "odpočívej",
-  "description": "už nemusíš programovat",
+  "name": "Updated Task",
+  "description": "Updated Description",
   "isCompleted": false,
-  "category": "relax"
+  "category": "Personal"
+}
+
+###
+
+//Update existing ToDoItem by id without Category
+PUT {{host}}:{{port}}/api/ToDoItems/{{itemToUpdateId}}
+Content-Type: application/json
+
+{
+  "name": "Updated Task",
+  "description": "Updated Description",
+  "isCompleted": false,
+  "category": null
 }
 
 ###

@@ -1,6 +1,7 @@
 namespace ToDoList.Test.IntegrationTests;
 
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using ToDoList.Domain.DTOs;
 using ToDoList.Persistence;
 using ToDoList.Persistence.Repositories;
@@ -9,7 +10,7 @@ using ToDoList.WebApi.Controllers;
 public class PostTests
 {
     [Fact]
-    public void Post_ValidRequest_ReturnsNewItem()
+    public async Task Post_ValidRequest_ReturnsNewItem()
     {
         // Arrange
         var connectionString = "Data Source=../../../IntegrationTests/data/localdb_test.db";
@@ -19,16 +20,17 @@ public class PostTests
         var request = new ToDoItemCreateRequestDto(
             Name: "Jmeno",
             Description: "Popis",
-            IsCompleted: false
+            IsCompleted: false,
+            Category: null
         );
 
         // Act
-        var result = controller.Create(request);
+        var result = await controller.Create(request);
         var resultResult = result.Result;
-        var value = result.GetValue();
 
         // Assert
-        Assert.IsType<CreatedAtActionResult>(resultResult);
+        var createdAtResult = Assert.IsType<CreatedAtActionResult>(resultResult);
+        var value = createdAtResult.Value as ToDoItemGetResponseDto;
         Assert.NotNull(value);
 
         Assert.Equal(request.Description, value.Description);
@@ -36,11 +38,11 @@ public class PostTests
         Assert.Equal(request.Name, value.Name);
 
         // Cleanup
-        var createdItem = context.ToDoItems.Find(value.Id);
+        var createdItem = await context.ToDoItems.FindAsync(value.Id);
         if (createdItem != null)
         {
             context.ToDoItems.Remove(createdItem);
-            context.SaveChanges();
+            await context.SaveChangesAsync();
         }
     }
 }

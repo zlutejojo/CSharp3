@@ -1,6 +1,7 @@
 namespace ToDoList.Test.IntegrationTests;
 
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using ToDoList.Domain.DTOs;
 using ToDoList.Domain.Models;
 using ToDoList.Persistence;
@@ -10,7 +11,7 @@ using ToDoList.WebApi.Controllers;
 public class PutTests
 {
     [Fact]
-    public void Put_ValidId_ReturnsNoContent()
+    public async Task Put_ValidId_ReturnsNoContent()
     {
         // Arrange
         var connectionString = "Data Source=../../../IntegrationTests/data/localdb_test.db";
@@ -24,28 +25,29 @@ public class PutTests
             Description = "Popis",
             IsCompleted = false
         };
-        context.ToDoItems.Add(toDoItem);
-        context.SaveChanges();
+        await context.ToDoItems.AddAsync(toDoItem);
+        await context.SaveChangesAsync();
 
         var request = new ToDoItemUpdateRequestDto(
             Name: "Jine jmeno",
             Description: "Jiny popis",
-            IsCompleted: true
+            IsCompleted: true,
+            Category: null
         );
 
         // Act
-        var result = controller.UpdateById(toDoItem.ToDoItemId, request);
+        var result = await controller.UpdateById(toDoItem.ToDoItemId, request);
 
         // Assert
         Assert.IsType<NoContentResult>(result);
 
         // Cleanup
         context.ToDoItems.Remove(toDoItem);
-        context.SaveChanges();
+        await context.SaveChangesAsync();
     }
 
     [Fact]
-    public void Put_InvalidId_ReturnsNotFound()
+    public async Task Put_InvalidId_ReturnsNotFound()
     {
         // Arrange
         var connectionString = "Data Source=../../../IntegrationTests/data/localdb_test.db";
@@ -56,12 +58,13 @@ public class PutTests
         var request = new ToDoItemUpdateRequestDto(
             Name: "Jine jmeno",
             Description: "Jiny popis",
-            IsCompleted: true
+            IsCompleted: true,
+            Category: null
         );
 
         // Act
         var invalidId = -1;
-        var result = controller.UpdateById(invalidId, request);
+        var result = await controller.UpdateById(invalidId, request);
 
         // Assert
         Assert.IsType<NotFoundResult>(result);

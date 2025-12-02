@@ -10,48 +10,50 @@ using ToDoList.Domain.Models;
 public class PostTests
 {
     [Fact]
-    public void Post_CreateValidRequest_ReturnsCreatedAtAction()
+    public async Task Post_CreateValidRequest_ReturnsCreatedAtAction()
     {
         // Arrange
-        var repositoryMock = Substitute.For<IRepository<ToDoItem>>();
+        var repositoryMock = Substitute.For<IRepositoryAsync<ToDoItem>>();
         var controller = new ToDoItemsController(repositoryMock);
         var request = new ToDoItemCreateRequestDto(
             Name: "Jmeno",
             Description: "Popis",
-            IsCompleted: false
+            IsCompleted: false,
+            Category: null
         );
 
         // Act
-        var result = controller.Create(request);
+        var result = await controller.Create(request);
         var resultResult = result.Result;
-        var value = result.GetValue();
 
         // Assert
-        Assert.IsType<CreatedAtActionResult>(resultResult);
+        var createdAtResult = Assert.IsType<CreatedAtActionResult>(resultResult);
+        var value = createdAtResult.Value as ToDoItemGetResponseDto;
         Assert.NotNull(value);
 
         Assert.Equal(request.Description, value.Description);
         Assert.Equal(request.IsCompleted, value.IsCompleted);
         Assert.Equal(request.Name, value.Name);
 
-        repositoryMock.Received(1).Create(Arg.Any<ToDoItem>());
+        await repositoryMock.Received(1).CreateAsync(Arg.Any<ToDoItem>());
     }
 
     [Fact]
-    public void Post_CreateUnhandledException_ReturnsInternalServerError()
+    public async Task Post_CreateUnhandledException_ReturnsInternalServerError()
     {
         // Arrange
-        var repositoryMock = Substitute.For<IRepository<ToDoItem>>();
-        repositoryMock.When(x => x.Create(Arg.Any<ToDoItem>())).Throw(new Exception("Database error"));
+        var repositoryMock = Substitute.For<IRepositoryAsync<ToDoItem>>();
+        repositoryMock.CreateAsync(Arg.Any<ToDoItem>()).Returns(x => Task.FromException(new Exception("Database error")));
         var controller = new ToDoItemsController(repositoryMock);
         var request = new ToDoItemCreateRequestDto(
             Name: "Jmeno",
             Description: "Popis",
-            IsCompleted: false
+            IsCompleted: false,
+            Category: null
         );
 
         // Act
-        var result = controller.Create(request);
+        var result = await controller.Create(request);
         var resultResult = result.Result;
 
         // Assert
@@ -59,6 +61,6 @@ public class PostTests
         var objectResult = resultResult as ObjectResult;
         Assert.Equal(500, objectResult?.StatusCode);
 
-        repositoryMock.Received(1).Create(Arg.Any<ToDoItem>());
+        await repositoryMock.Received(1).CreateAsync(Arg.Any<ToDoItem>());
     }
 }
