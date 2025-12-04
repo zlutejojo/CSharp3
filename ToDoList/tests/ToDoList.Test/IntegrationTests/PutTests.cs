@@ -27,7 +27,7 @@ public class PutTests : IAsyncLifetime
     public async Task Put_UpdateItem_ReturnsCreatedResponse()
     {
         // Arrange
-        var originalItem = new ToDoItem { Name = "Vyper", Description = "Vyper barevné prádlo" };
+        var originalItem = new ToDoItem { Name = "Vyper", Description = "Vyper barevné prádlo", IsCompleted = false, Category = "Udělej" };
         context.ToDoItems.Add(originalItem);
         await context.SaveChangesAsync();
 

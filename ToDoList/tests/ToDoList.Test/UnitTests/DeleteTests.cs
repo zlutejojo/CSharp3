@@ -26,7 +26,8 @@ public class DeleteTests
     {
         // Arrange
         int existingId = 1;
-        var itemToDelete = new ToDoItem { ToDoItemId = existingId, Name = "Položka ke smazání", Description = "Tato položka bude smazána", IsCompleted = false };
+        var itemToDelete = new ToDoItem { ToDoItemId = existingId, Name = "Položka ke smazání", Description = "Tato položka bude smazána", IsCompleted = false, Category
+        = "Tato položka bude smazána" };
         repositoryMock.GetByIdAsync(existingId).Returns(itemToDelete);
         // Act
         IActionResult actionResult = await controller.DeleteById(itemToDelete.ToDoItemId);
@@ -61,7 +62,7 @@ public class DeleteTests
         // Arrange
         var exceptionMessage = "Database connection failed";
         int existingId = 1;
-        var itemToUpdate = new ToDoItem { ToDoItemId = existingId, Name = "Test Item", Description = "Test Description", IsCompleted = false };
+        var itemToUpdate = new ToDoItem { ToDoItemId = existingId, Name = "Test Item", Description = "Test Description", IsCompleted = false, Category = "Test Category" };
         repositoryMock.GetByIdAsync(existingId).Returns(itemToUpdate);
         repositoryMock.When(x => x.DeleteAsync(existingId))
                       .Do(call => { throw new Exception(exceptionMessage); });

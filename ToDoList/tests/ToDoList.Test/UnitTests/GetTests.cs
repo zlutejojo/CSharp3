@@ -80,7 +80,7 @@ public class GetTests
     {
         // Arrange
         int existingId = 1;
-        var item = new ToDoItem { ToDoItemId = existingId, Name = "Vyluxuj", Description = "Vyluxuj celý byt", IsCompleted = false };
+        var item = new ToDoItem { ToDoItemId = existingId, Name = "Vyluxuj", Description = "Vyluxuj celý byt", IsCompleted = false, Category = "Domácí práce" };
 
         repositoryMock.GetByIdAsync(existingId).Returns(item);
 
