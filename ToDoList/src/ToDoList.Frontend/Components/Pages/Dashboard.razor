@@ -13,7 +13,9 @@
                 <th><button class="btn btn-warning" @onclick="OrderByDescription">Popis</button></th>
                 <th><button class="btn btn-warning" @onclick="OrderByCompleted">Dokončeno</button></th>
                 <th><button class="btn btn-warning" @onclick="OrderByCategory">Kategorie</button></th>
-                <th><button class="btn btn-warning">Actions</button></th>
+                <th><button class="btn btn-warning">Editace</button></th>
+                <th><button class="btn btn-warning">Mazání</button></th>
+                <th><button class="btn btn-warning">Přepni</button></th>
             </tr>
         </thead>
         <tbody>
@@ -25,22 +27,18 @@
                     <td>@item.Description</td>
                     <td>@(item.IsCompleted ? "Dokončený" : "Nedokončený")</td>
                     <td>@item.Category</td>
-                    <td><button class="btn btn-warning" @onclick="() => EditItem(item)">Edit</button></td>
+                    <td><button class="btn btn-warning" @onclick="() => EditItem(item)">Edituj</button></td>
+                    <td><button class="btn btn-warning" @onclick="() => DeleteItem(item)">Smaž</button></td>
+                    <td><button class="btn btn-warning" @onclick="() => ToggleItemCompletion(item)">Přepni dokončeno</button></td>
                 </tr>
             }
         </tbody>
     </table>
 </div>
-
+<div>
+    <button class="btn btn-warning" @onclick="() => AddItem()">Přidej položku</button>
+</div>
 @code {
-    @* private List<ToDoItemView> sortedData = new()
-{
-new ToDoItemView(1, "Nakoupit potraviny", "Mléko, chléb, vejce", false),
-new ToDoItemView(2, "Dokončit projekt", "Implementovat všechny funkce", true),
-new ToDoItemView(3, "Zavolat mamince", "Domluvit víkend", false),
-new ToDoItemView(4, "Cvičit", "Běhání v parku", false),
-new ToDoItemView(5, "Přečíst knihu", "Kapitola 5", true)
-}; *@
 
     private List<ToDoItemView> sortedData = new();
     private void OrderById()
@@ -75,5 +73,18 @@ new ToDoItemView(5, "Přečíst knihu", "Kapitola 5", true)
     protected void EditItem(ToDoItemView item)
     {
         NavigationManager.NavigateTo($"/editTodoItem/{item.Id}");
+    }
+
+    protected async Task DeleteItem(ToDoItemView item)
+    {
+        await toDoItemsClient.DeleteItemAsync(item.Id);
+        sortedData = await toDoItemsClient.ReadItemsAsync();
+    }
+
+    protected async Task ToggleItemCompletion(ToDoItemView item)
+    {
+        item.IsCompleted = !item.IsCompleted;
+        await toDoItemsClient.UpdateItemAsync(item);
+        sortedData = await toDoItemsClient.ReadItemsAsync();
     }
 }
