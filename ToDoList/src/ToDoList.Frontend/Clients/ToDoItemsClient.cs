@@ -16,16 +16,40 @@ public class ToDoItemsClient : IToDoItemsClient
     // tady pouzivam reprezentaci z Dashboardu
     public async Task<List<ToDoItemView>> ReadItemsAsync()
     {
-        var toDoItemsView = new List<ToDoItemView>();
+        var toDoItemsViews = new List<ToDoItemView>();
         var response = await httpClient.GetFromJsonAsync<List<ToDoItemGetResponseDto>>("api/ToDoItems");
 
-        toDoItemsView = response.Select(dto => new ToDoItemView(
-            dto.Id,
-            dto.Name,
-            dto.Description,
-            dto.IsCompleted
-            )).ToList();
+        toDoItemsViews = response.Select(dto => new ToDoItemView()
+        {
+            Id = dto.Id,
+            Name = dto.Name,
+            Description = dto.Description,
+            IsCompleted = dto.IsCompleted,
+            Category = dto.Category
+        }).ToList();
 
-        return toDoItemsView;
+        return toDoItemsViews;
+    }
+
+    public async Task<ToDoItemView?> ReadItemByIdAsync(int itemId)
+    {
+        var response = await httpClient.GetFromJsonAsync<ToDoItemGetResponseDto>($"api/ToDoItems/{itemId}");
+
+        var toDoItem = new ToDoItemView()
+        {
+            Id = response.Id,
+            Name = response.Name,
+            Description = response.Description,
+            IsCompleted = response.IsCompleted,
+            Category = response.Category
+        };
+        return toDoItem;
+    }
+
+    public async Task UpdateItemAsync(ToDoItemView item)
+    {
+        // try {}
+        var itemRequest = new ToDoItemUpdateRequestDto(item.Name, item.Description, item.IsCompleted, item.Category);
+        var response = await httpClient.PutAsJsonAsync($"api/ToDoItems/{item.Id}", itemRequest);
     }
 }

@@ -1,26 +1,29 @@
 ﻿@using ToDoList.Frontend.Clients
 @using ToDoList.Frontend.Models
 @rendermode InteractiveServer
+@inject NavigationManager NavigationManager
 @inject IToDoItemsClient toDoItemsClient
 <div>
     <h2>ToDo items dashboard</h2>
-    <table>
-        <thead>
+    <table class="table table-hover mt-3">
+        <thead class="table-dark">
             <tr>
-                <th><button class="btn btn-link" @onclick="OrderById">ID</button></th>
-                <th><button class="btn btn-link" @onclick="OrderByName">Název</button></th>
-                <th><button class="btn btn-link" @onclick="OrderByDescription">Popis</button></th>
-                <th><button class="btn btn-link" @onclick="OrderByCompleted">Dokončeno</button></th>
+                <th><button class="btn btn-warning" @onclick="OrderById">ID</button></th>
+                <th><button class="btn btn-warning" @onclick="OrderByName">Název</button></th>
+                <th><button class="btn btn-warning" @onclick="OrderByDescription">Popis</button></th>
+                <th><button class="btn btn-warning" @onclick="OrderByCompleted">Dokončeno</button></th>
+                <th><button class="btn btn-warning">Actions</button></th>
             </tr>
         </thead>
         <tbody>
             @foreach (var item in sortedData)
             {
-                <tr>
+                <tr class="table-secondary">
                     <td>@item.Id</td>
                     <td>@item.Name</td>
                     <td>@item.Description</td>
                     <td>@(item.IsCompleted ? "Dokončený" : "Nedokončený")</td>
+                    <td><button class="btn btn-warning" @onclick="() => EditItem(item)">Edit</button></td>
                 </tr>
             }
         </tbody>
@@ -28,14 +31,16 @@
 </div>
 
 @code {
-    private List<ToDoItemView> sortedData = new()
+    @* private List<ToDoItemView> sortedData = new()
 {
 new ToDoItemView(1, "Nakoupit potraviny", "Mléko, chléb, vejce", false),
 new ToDoItemView(2, "Dokončit projekt", "Implementovat všechny funkce", true),
 new ToDoItemView(3, "Zavolat mamince", "Domluvit víkend", false),
 new ToDoItemView(4, "Cvičit", "Běhání v parku", false),
 new ToDoItemView(5, "Přečíst knihu", "Kapitola 5", true)
-};
+}; *@
+
+private List<ToDoItemView> sortedData = new();
     private void OrderById()
     {
         sortedData = sortedData.OrderBy(item => item.Id).ToList();
@@ -58,5 +63,10 @@ new ToDoItemView(5, "Přečíst knihu", "Kapitola 5", true)
     protected override async Task OnInitializedAsync()
     {
         sortedData = await toDoItemsClient.ReadItemsAsync();
+    }
+
+    protected void EditItem(ToDoItemView item)
+    {
+        NavigationManager.NavigateTo($"/editTodoItem/{item.Id}");
     }
 }
