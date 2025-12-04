@@ -57,4 +57,8 @@ public class ToDoItemsClient : IToDoItemsClient
     {
         return httpClient.DeleteAsync($"api/ToDoItems/{itemId}");
     }
+
+    public Task CreateItemAsync(ToDoItemView item) {
+        return httpClient.PostAsJsonAsync("api/ToDoItems", item);
+    }
 }
