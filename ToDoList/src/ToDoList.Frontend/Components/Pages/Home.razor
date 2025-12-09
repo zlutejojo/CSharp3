@@ -8,3 +8,38 @@
 <hr />
 
 <Dashboard />
+
+<hr />
+@code {
+    public delegate int NumberOperationDelegate(int number1, int number2); //definice delegátu
+    public delegate void StringTakingDelegate(string message);
+    public int Multiply(int a, int b)
+    {
+        Console.WriteLine("Multiply called.");
+        return a * b;
+    }
+    public int Divide(int a, int b)
+    {
+        Console.WriteLine("Divide called.");
+        return a / b;
+    }
+    public void LogToConsole(string msg)
+    {
+        Console.WriteLine(msg);
+    }
+    protected override void OnInitialized()
+    {
+        NumberOperationDelegate mujDelegat; // deklarace
+        mujDelegat = Multiply;
+        mujDelegat += Multiply;
+        mujDelegat += Divide;
+        var result = mujDelegat(2, 3);
+        Console.WriteLine(result);
+        StringTakingDelegate mujDelegatNaStringy; //deklarace
+        mujDelegatNaStringy = LogToConsole;
+        mujDelegatNaStringy += LogToConsole;
+        mujDelegatNaStringy += LogToConsole;
+        mujDelegatNaStringy?.Invoke("LogujuDoKonzole");
+
+    }
+}

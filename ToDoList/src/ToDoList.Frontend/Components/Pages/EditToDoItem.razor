@@ -28,6 +28,7 @@
     protected override async Task OnInitializedAsync()
     {
         ToDoItemModel = await toDoItemsClient.ReadItemByIdAsync(ItemId);
+        SubmitDelegate += logSubmit;
     }
 
     [Parameter]
@@ -40,5 +41,18 @@
     {
         await toDoItemsClient.UpdateItemAsync(ToDoItemModel);
         NavigationManager.NavigateTo("/");
+        SubmitDelegate?.Invoke(ToDoItemModel);
     }
+
+    public delegate void ToDoItemViewProcessingDelegate(ToDoItemView item);
+
+    public ToDoItemViewProcessingDelegate SubmitDelegate;
+
+    public void logSubmit(ToDoItemView item)
+    {
+        Console.WriteLine("Položka má název: " + item.Name);
+
+    }
+
+
 }
