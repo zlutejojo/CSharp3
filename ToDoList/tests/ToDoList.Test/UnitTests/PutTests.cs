@@ -26,11 +26,11 @@ public class PutTests
     {
         // Arrange
         int existingId = 1;
-        var originalItem = new ToDoItem { ToDoItemId = existingId, Name = "Vyper", Description = "Vyper barevné prádlo", IsCompleted = false };
+        var originalItem = new ToDoItem { ToDoItemId = existingId, Name = "Vyper", Description = "Vyper barevné prádlo", IsCompleted = false, Category = "Udělej" };
 
         repositoryMock.GetByIdAsync(existingId).Returns(originalItem);
 
-        var request = new ToDoItemUpdateRequestDto("Vyper", "Vyper bílé prádlo", false, "domácí práce");
+        var request = new ToDoItemUpdateRequestDto("Vyper", "Vyper bílé prádlo", false, "Domácí práce");
 
         // Act
         var actionResult = await controller.UpdateById(existingId, request);
@@ -72,7 +72,7 @@ public class PutTests
         // Arrange
         var exceptionMessage = "Database connection failed";
         int existingId = 1;
-        var itemToUpdate = new ToDoItem { ToDoItemId = existingId, Name = "Test Item", Description = "Test Description", IsCompleted = false };
+        var itemToUpdate = new ToDoItem { ToDoItemId = existingId, Name = "Test Item", Description = "Test Description", IsCompleted = false, Category = "Test Category" };
         // Nejprve musíme simulovat, že položka byla nalezena
         repositoryMock.GetByIdAsync(existingId).Returns(itemToUpdate);
         // až potom nastavíme, že samotný update selže

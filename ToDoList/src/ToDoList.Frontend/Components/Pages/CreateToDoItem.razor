@@ -1,0 +1,45 @@
+﻿@page "/createToDoItem"
+@using ToDoList.Frontend.Clients
+@using ToDoList.Frontend.Models
+
+@inject IToDoItemsClient toDoItemsClient
+@inject NavigationManager NavigationManager
+
+@rendermode InteractiveServer
+
+
+    <EditForm Model="ToDoItemModel" FormName="CreateToDoItem" OnSubmit="Submit">
+
+    <div class="mb-3">
+        <label for="Name" class="form-label">Jméno</label>
+        <InputText id="Name" @bind-Value="ToDoItemModel.Name" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label for="Description" class="form-label">Popis</label>
+        <InputText id="Description" @bind-Value="ToDoItemModel.Description" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label for="Category" class="form-label">Kategorie</label>
+        <InputText id="Category" @bind-Value="ToDoItemModel.Category" class="form-control" />
+    </div>
+
+    <div class="mb-3 form-check">
+        <InputCheckbox id="IsCompleted" @bind-Value="ToDoItemModel.IsCompleted" class="form-check-input" />
+        <label for="IsCompleted" class="form-check-label">Dokončeno</label>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Odeslat</button>
+</EditForm>
+
+
+@code {
+    public ToDoItemView ToDoItemModel { get; set; } = new ToDoItemView();
+
+    public async Task Submit()
+    {
+        await toDoItemsClient.CreateItemAsync(ToDoItemModel);
+        NavigationManager.NavigateTo("/");
+    }
+}
