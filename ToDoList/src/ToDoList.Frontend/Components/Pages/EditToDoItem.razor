@@ -9,12 +9,15 @@
 
 @if (ToDoItemModel is not null)
 {
-    <EditForm Model="ToDoItemModel" FormName="EditToDoItem" OnSubmit="Submit">
+    <EditForm Model="ToDoItemModel" FormName="EditToDoItem" OnValidSubmit="Submit">
+        <DataAnnotationsValidator/>
         <div class="mb-3">
             <label for="Name" class="form-label">Name</label>
             <InputText id="Name" @bind-Value="ToDoItemModel.Name" class="form-control" />
+            <ValidationMessage For="() => ToDoItemModel.Name" />
         </div>
         <InputText id="Description" @bind-Value="ToDoItemModel.Description" />
+        <ValidationMessage For="() => ToDoItemModel.Description" />
         <InputCheckbox id="IsCompleted" @bind-Value="ToDoItemModel.IsCompleted" />
         <InputText id="Category" @bind-Value="ToDoItemModel.Category" />
         <button type="submit">Odeslat</button>
